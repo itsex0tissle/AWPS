@@ -1,0 +1,10 @@
+@page "/configuration"
+
+@if(base.RendererInfo.Name is not Renderer.WebView)
+{
+    <DeviceConfigurationPageContent @rendermode=@RenderMode.InteractiveWebAssembly />
+}
+else
+{
+    <DeviceConfigurationPageContent />
+}

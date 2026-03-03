@@ -1,0 +1,10 @@
+﻿@page "/"
+
+@if(base.RendererInfo.Name is not Renderer.WebView)
+{
+    <RootPageContent @rendermode=@RenderMode.InteractiveServer />
+}
+else
+{
+    <RootPageContent />
+}

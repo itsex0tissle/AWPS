@@ -361,3 +361,5 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+/AWPS.IoT/tailwind.extension.json
+/AWPS.UI/AWPS.UI.Shared/wwwroot/tailwind.css
