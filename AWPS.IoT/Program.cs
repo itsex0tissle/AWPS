@@ -9,6 +9,9 @@
  * nanoFramework.System.Adc;
  * nanoFramework.IoT.Device.Dhtxx.Esp32;
  * nanoFramework.System.IO.FileSystem;
+ * nanoFramework.M2Mqtt;
+ * nanoFramework.ResourceManager;
+ * nanoFramework.Hardware.Esp32;
  */
 
 #nullable enable
@@ -22,8 +25,12 @@ using AWPS.IoT.Measuring;
 using Iot.Device.DhcpServer;
 using nanoFramework.WebServer;
 using AWPS.IoT.WebControllers;
+using AWPS.IoT.MqttInteraction;
+using nanoFramework.Networking;
 using nanoFramework.Runtime.Native;
 using System.Net.NetworkInformation;
+using nanoFramework.Hardware.Esp32;
+using System.Diagnostics.CodeAnalysis;
 
 namespace AWPS.IoT
 {
@@ -70,7 +77,22 @@ namespace AWPS.IoT
             {
                 IsHoldingEnabled = true
             };
-            button.Press += delegate(object sender, EventArgs event_args)
+            button.Press += ToogleWirelessAP;
+            button.Holding += ResetMeasuringData;
+            Debug.Write("Button enabled");
+            if(WirelessAP.Enabled is false && Sleep.GetWakeupCause() is Sleep.WakeupCause.Timer)
+            {
+                Debug.WriteLine(". Disabling in 10s");
+                Thread.Sleep(10000);
+                button.Press -= ToogleWirelessAP;
+                button.Holding -= ResetMeasuringData;
+                button.Dispose();
+                Debug.WriteLine("Button disabled");
+                return;
+            }
+            Debug.WriteLine();
+
+            static void ToogleWirelessAP(object sender, EventArgs event_args)
             {
                 if(WirelessAP.Enabled is false)
                 {
@@ -80,8 +102,14 @@ namespace AWPS.IoT
                 {
                     WirelessAP.Disable();
                 }
-            };
-            Debug.WriteLine("Button enabled");
+            }
+            static void ResetMeasuringData(object sender, ButtonHoldingEventArgs event_args)
+            {
+                if(event_args.HoldingState is ButtonHoldingState.Started)
+                {
+                    MeasuringDataFile.Reset();
+                }
+            }
         }
         private static void StartDhcpServerIfWirelessAPEnabled()
         {
@@ -124,6 +152,16 @@ namespace AWPS.IoT
                 }
             };
         }
+        private static void TryReconnectToWifi()
+        {
+            WifiNetworkHelper.Reconnect(requiresDateTime: true);
+        }
+        [DoesNotReturn] private static void EnterDeepSleep(TimeSpan restart_in)
+        {
+            Debug.WriteLine($"Enter deep sleep. Restart in: {restart_in}");
+            Sleep.EnableWakeupByTimer(restart_in);
+            Sleep.StartDeepSleep();
+        }
         private static void EnsureUtcNowIsValid()
         {
             if(DateTime.UtcNow.Year > 2025)
@@ -132,11 +170,15 @@ namespace AWPS.IoT
                 return;
             }
             Debug.WriteLine("System time is not UTC");
-            Thread.Sleep(Timeout.Infinite);
+            EnterDeepSleep(TimeSpan.FromMinutes(5));
         }
         private static void StartMeasuringData()
         {
             MeasuringWork.Start();
+        }
+        private static void StartMqttInteractor()
+        {
+            MqttInteractor.Start();
         }
 
         public static void Main()
@@ -152,9 +194,11 @@ namespace AWPS.IoT
                 Thread.Sleep(Timeout.Infinite);
             }
             Debug.WriteLine("Device mode: Normal");
+            TryReconnectToWifi();
             EnsureUtcNowIsValid();
             StartMeasuringData();
-            Thread.Sleep(Timeout.Infinite);
+            StartMqttInteractor();
+            EnterDeepSleep(TimeSpan.FromSeconds(30));
         }
     }
 }

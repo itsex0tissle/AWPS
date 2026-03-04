@@ -363,3 +363,5 @@ MigrationBackup/
 FodyWeavers.xsd
 /AWPS.IoT/tailwind.extension.json
 /AWPS.UI/AWPS.UI.Shared/wwwroot/tailwind.css
+/AWPS.IoT/MqttInteraction/ServerCertificate.crt
+/AWPS.IoT/MqttInteraction/MqttResources.resx
