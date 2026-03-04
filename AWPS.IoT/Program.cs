@@ -6,6 +6,9 @@
  * nanoFramework.WebServer;
  * nanoFramework.System.Device.Wifi;
  * nanoFramework.Json;
+ * nanoFramework.System.Adc;
+ * nanoFramework.IoT.Device.Dhtxx.Esp32;
+ * nanoFramework.System.IO.FileSystem;
  */
 
 #nullable enable
@@ -15,6 +18,7 @@ using System.Net;
 using System.Threading;
 using Iot.Device.Button;
 using System.Diagnostics;
+using AWPS.IoT.Measuring;
 using Iot.Device.DhcpServer;
 using nanoFramework.WebServer;
 using AWPS.IoT.WebControllers;
@@ -120,6 +124,20 @@ namespace AWPS.IoT
                 }
             };
         }
+        private static void EnsureUtcNowIsValid()
+        {
+            if(DateTime.UtcNow.Year > 2025)
+            {
+                Debug.WriteLine("System time is UTC");
+                return;
+            }
+            Debug.WriteLine("System time is not UTC");
+            Thread.Sleep(Timeout.Infinite);
+        }
+        private static void StartMeasuringData()
+        {
+            MeasuringWork.Start();
+        }
 
         public static void Main()
         {
@@ -128,6 +146,14 @@ namespace AWPS.IoT
             SetupButton();
             StartDhcpServerIfWirelessAPEnabled();
             SetupTooglingWebServerBasedOnAP();
+            if(WirelessAP.Enabled is true)
+            {
+                Debug.WriteLine("Device mode: Configuration");
+                Thread.Sleep(Timeout.Infinite);
+            }
+            Debug.WriteLine("Device mode: Normal");
+            EnsureUtcNowIsValid();
+            StartMeasuringData();
             Thread.Sleep(Timeout.Infinite);
         }
     }
