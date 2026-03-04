@@ -27,9 +27,9 @@ using nanoFramework.WebServer;
 using AWPS.IoT.WebControllers;
 using AWPS.IoT.MqttInteraction;
 using nanoFramework.Networking;
+using nanoFramework.Hardware.Esp32;
 using nanoFramework.Runtime.Native;
 using System.Net.NetworkInformation;
-using nanoFramework.Hardware.Esp32;
 using System.Diagnostics.CodeAnalysis;
 
 namespace AWPS.IoT
@@ -37,6 +37,7 @@ namespace AWPS.IoT
     public static class Program
     {
         private static WebServer? WebServer { get; set; }
+        private static Timer? WirelessAPTimer { get; set; }
 
         [Conditional("DEBUG")] private static void SetupLogs()
         {
@@ -73,6 +74,11 @@ namespace AWPS.IoT
         }
         private static void SetupButton()
         {
+            if(Sleep.GetWakeupCause() is Sleep.WakeupCause.Timer)
+            {
+                Debug.WriteLine("Wakeup cause is timer. No sense to enable button at all");
+                return;
+            }
             GpioButton button = new(21, TimeSpan.FromTicks(15000000L), TimeSpan.FromSeconds(3))
             {
                 IsHoldingEnabled = true
@@ -80,7 +86,7 @@ namespace AWPS.IoT
             button.Press += ToogleWirelessAP;
             button.Holding += ResetMeasuringData;
             Debug.Write("Button enabled");
-            if(WirelessAP.Enabled is false && Sleep.GetWakeupCause() is Sleep.WakeupCause.Timer)
+            if(WirelessAP.Enabled is false)
             {
                 Debug.WriteLine(". Disabling in 10s");
                 Thread.Sleep(10000);
@@ -121,6 +127,34 @@ namespace AWPS.IoT
                     Power.RebootDevice();
                 }
                 Debug.WriteLine("DHCP-server started");
+            }
+        }
+        private static void EnableTimeoutForWirelessAP()
+        {
+            if(WirelessAP.Enabled is true)
+            {
+                WirelessAPTimer = new Timer(DisableWirelessAP, null, 60000, Timeout.Infinite);
+                NetworkChange.NetworkAPStationChanged += delegate (int station_index, NetworkAPStationEventArgs event_args)
+                {
+                    if (event_args.IsConnected is true)
+                    {
+                        WirelessAPTimer?.Dispose();
+                        Debug.WriteLine("WirelessAP timeout disabled");
+                    }
+                    else
+                    {
+                        Debug.WriteLine("WirelessAP timeout enabled");
+                        WirelessAPTimer?.Dispose();
+                        WirelessAPTimer = new Timer(DisableWirelessAP, null, 60000, Timeout.Infinite);
+                    }
+                };
+                Debug.WriteLine("WirelessAP timeout enabled");
+
+                static void DisableWirelessAP(object? state)
+                {
+                    Debug.WriteLine("WirelessAP timeout");
+                    WirelessAP.Disable();
+                }
             }
         }
         private static void SetupTooglingWebServerBasedOnAP()
@@ -180,13 +214,13 @@ namespace AWPS.IoT
         {
             MqttInteractor.Start();
         }
-
         public static void Main()
         {
             Debug.WriteLine("Start of program");
             SetupLogs();
             SetupButton();
             StartDhcpServerIfWirelessAPEnabled();
+            EnableTimeoutForWirelessAP();
             SetupTooglingWebServerBasedOnAP();
             if(WirelessAP.Enabled is true)
             {
