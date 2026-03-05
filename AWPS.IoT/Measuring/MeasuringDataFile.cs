@@ -2,9 +2,9 @@
 
 using System;
 using System.IO;
-using nanoFramework.Json;
 using System.Collections;
 using System.Diagnostics;
+using AWPS.IoT.BinaryRecords;
 
 namespace AWPS.IoT.Measuring
 {
@@ -18,49 +18,43 @@ namespace AWPS.IoT.Measuring
         {
             MeasuringDataRecord record = new()
             {
-                Light = (int)Math.Round(light),
-                Moisture = (int)Math.Round(moisture),
-                Temperature = (int)Math.Round(temperature),
-                Humidity = (int)Math.Round(humidity)
+                Light = (byte)Math.Round(light),
+                Moisture = (byte)Math.Round(moisture),
+                Humidity = (byte)Math.Round(humidity),
+                Temperature = (sbyte)Math.Round(temperature)
             };
-            Debug.WriteLine($"Add record to MeasuringData file: {JsonConvert.SerializeObject(record)}");
+            Debug.WriteLine($"Add record to MeasuringDataFile");
             Records.Add(record);
         }
         public static void Save()
         {
-            string content = JsonConvert.SerializeObject(Records);
-            Debug.WriteLine($"Saving MeasuringData file: {content}");
-            File.WriteAllText(FilePath, content);
+            byte[] buffer = BinaryRecord.SerializeEnumerable(Records);
+            Debug.WriteLine($"Saving MeasuringDataFile");
+            File.WriteAllBytes(FilePath, buffer);
         }
         public static void Load()
         {
             if(File.Exists(FilePath) is false)
             {
-                Debug.WriteLine("Can`t load MeasuringData file, because it doesn`t exists");
+                Debug.WriteLine("Can`t load MeasuringDataFile, because it doesn`t exists");
                 return;
             }
             try
             {
-                string content = File.ReadAllText(FilePath);
-                Debug.WriteLine($"Loading MeasureData file: {content}");
-                var records = (MeasuringDataRecord[])JsonConvert.DeserializeObject(content, typeof(MeasuringDataRecord[]));
-                Records = new ArrayList();
-                foreach(MeasuringDataRecord record in records)
-                {
-                    Records.Add(record);
-                }
-                Debug.WriteLine($"MeasureData file loaded");
+                byte[] buffer = File.ReadAllBytes(FilePath);
+                Records = BinaryRecord.DeserializeEnumerable(buffer);
+                Debug.WriteLine($"MeasureDataFile loaded");
             }
             catch(Exception exc)
             {
-                Debug.WriteLine($"Loading MeasureData file failed due to exception: {exc}");
+                Debug.WriteLine($"Loading MeasureDataFile failed due to exception: {exc}");
             }
         }
         public static void Reset()
         {
             Records.Clear();
             File.Delete(FilePath);
-            Debug.WriteLine("Measuring file cleared");
+            Debug.WriteLine("MeasuringDataFile cleared");
         }
     }
 }

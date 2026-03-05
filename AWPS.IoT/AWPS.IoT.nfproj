@@ -18,6 +18,8 @@
   </PropertyGroup>
   <Import Project="$(NanoFrameworkProjectSystemPath)NFProjectSystem.props" Condition="Exists('$(NanoFrameworkProjectSystemPath)NFProjectSystem.props')" />
   <ItemGroup>
+    <Compile Include="BinaryRecords\BinaryRecord.cs" />
+    <Compile Include="BinaryRecords\BinaryRecordType.cs" />
     <Compile Include="Measuring\MeasuringDataFile.cs" />
     <Compile Include="Measuring\MeasuringDataRecord.cs" />
     <Compile Include="Measuring\MeasuringWork.cs" />
@@ -29,9 +31,9 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="WebControllers\Models\GetWifiStatusResponseModel.cs" />
-    <Compile Include="WebControllers\Models\PostWifiRequestModel.cs" />
-    <Compile Include="WebControllers\Models\PostWifiResponseModel.cs" />
+    <Compile Include="WebControllers\Records\GetWifiStatusResponseRecord.cs" />
+    <Compile Include="WebControllers\Records\PostWifiRequestRecord.cs" />
+    <Compile Include="WebControllers\Records\PostWifiResponseRecord.cs" />
     <Compile Include="WebControllers\Wireless80211WebController.cs" />
     <Compile Include="Wireless80211.cs" />
     <Compile Include="WirelessAP.cs" />
@@ -44,7 +46,7 @@
       <HintPath>..\packages\nanoFramework.Iot.Device.DhcpServer.1.2.909\lib\Iot.Device.DhcpServer.dll</HintPath>
     </Reference>
     <Reference Include="Iot.Device.Dhtxx.Esp32">
-      <HintPath>..\packages\nanoFramework.Iot.Device.Dhtxx.Esp32.1.2.931\lib\Iot.Device.Dhtxx.Esp32.dll</HintPath>
+      <HintPath>..\packages\nanoFramework.Iot.Device.Dhtxx.Esp32.1.2.952\lib\Iot.Device.Dhtxx.Esp32.dll</HintPath>
     </Reference>
     <Reference Include="mscorlib">
       <HintPath>..\packages\nanoFramework.CoreLibrary.1.17.11\lib\mscorlib.dll</HintPath>
@@ -54,9 +56,6 @@
     </Reference>
     <Reference Include="nanoFramework.Hardware.Esp32.Rmt">
       <HintPath>..\packages\nanoFramework.Hardware.Esp32.Rmt.2.0.35\lib\nanoFramework.Hardware.Esp32.Rmt.dll</HintPath>
-    </Reference>
-    <Reference Include="nanoFramework.Json">
-      <HintPath>..\packages\nanoFramework.Json.2.2.203\lib\nanoFramework.Json.dll</HintPath>
     </Reference>
     <Reference Include="nanoFramework.M2Mqtt">
       <HintPath>..\packages\nanoFramework.M2Mqtt.5.1.206\lib\nanoFramework.M2Mqtt.dll</HintPath>
@@ -78,6 +77,12 @@
     </Reference>
     <Reference Include="nanoFramework.System.Text">
       <HintPath>..\packages\nanoFramework.System.Text.1.3.42\lib\nanoFramework.System.Text.dll</HintPath>
+    </Reference>
+    <Reference Include="nanoFramework.UnitsNet.RelativeHumidity">
+      <HintPath>..\packages\nanoFramework.UnitsNet.RelativeHumidity.5.76.15\lib\netnano1.0\nanoFramework.UnitsNet.RelativeHumidity.dll</HintPath>
+    </Reference>
+    <Reference Include="nanoFramework.UnitsNet.Temperature">
+      <HintPath>..\packages\nanoFramework.UnitsNet.Temperature.5.76.15\lib\netnano1.0\nanoFramework.UnitsNet.Temperature.dll</HintPath>
     </Reference>
     <Reference Include="nanoFramework.WebServer">
       <HintPath>..\packages\nanoFramework.WebServer.1.2.134\lib\nanoFramework.WebServer.dll</HintPath>

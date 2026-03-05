@@ -5,7 +5,6 @@
  * nanoFramework.IoT.Device.Button;
  * nanoFramework.WebServer;
  * nanoFramework.System.Device.Wifi;
- * nanoFramework.Json;
  * nanoFramework.System.Adc;
  * nanoFramework.IoT.Device.Dhtxx.Esp32;
  * nanoFramework.System.IO.FileSystem;
