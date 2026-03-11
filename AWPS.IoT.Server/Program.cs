@@ -8,7 +8,7 @@ builder.Services.AddScoped<MqttClientFactory>();
 builder.Services.AddScoped<MqttInteractor>();
 builder.Services.AddDbContextFactory<ApplicationDatabase>(options =>
 {
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new ArgumentException("Connection string not found"));
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new Exception("Connection string not found"));
 });
 
 WebApplication app = builder.Build();

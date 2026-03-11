@@ -1,7 +1,16 @@
 using AWPS.UI.Web;
+using AWPS.UI.Web.Services;
+using AWPS.IoT.Server.EFCore;
+using AWPS.UI.Shared.Services;
+using Microsoft.EntityFrameworkCore;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents().AddInteractiveServerComponents().AddInteractiveWebAssemblyComponents();
+builder.Services.AddDbContextFactory<ApplicationDatabase>(options =>
+{
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new Exception("Connection string not found"));
+});
+builder.Services.AddScoped<IApplicationDatabaseInteractor, ApplicationDatabaseInteractor>();
 
 WebApplication app = builder.Build();
 if(app.Environment.IsDevelopment() is true)

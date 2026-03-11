@@ -1,5 +1,7 @@
+@inject IApplicationDatabaseInteractor DatabaseInteractor
+
 <PageTitle>Home</PageTitle>
 
 <h1>Hello, world!</h1>
 
-Welcome to your new app.
+<div>@JsonSerializer.Serialize(DatabaseInteractor.GetMeasuringDataSet())</div>

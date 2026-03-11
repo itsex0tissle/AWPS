@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using AWPS.UI.Services;
+using AWPS.UI.Shared.Services;
+using Microsoft.Extensions.Logging;
 
 namespace AWPS.UI;
 
@@ -12,6 +14,7 @@ public static class MauiProgram
             fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
         });
         builder.Services.AddMauiBlazorWebView();
+        builder.Services.AddScoped<IApplicationDatabaseInteractor, ApplicationDatabaseInteractor>();
 #if DEBUG
         builder.Services.AddBlazorWebViewDeveloperTools();
         builder.Logging.AddDebug();
