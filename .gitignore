@@ -365,3 +365,6 @@ FodyWeavers.xsd
 /AWPS.UI/AWPS.UI.Shared/wwwroot/tailwind.css
 /AWPS.IoT/MqttInteraction/ServerCertificate.crt
 /AWPS.IoT/MqttInteraction/MqttResources.resx
+/AWPS.IoT.Server/MqttInteraction/ServerCertificate.crt
+/AWPS.IoT.Server/MqttInteraction/MqttResources.resx
+/AWPS.IoT.Server/MqttInteraction/MqttResources.Designer.cs

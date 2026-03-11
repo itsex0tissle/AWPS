@@ -1,4 +1,5 @@
 <Solution>
+  <Project Path="AWPS.IoT.Server/AWPS.IoT.Server.csproj" Id="9ec7e363-1b9a-4aaf-a0fd-58a531aba0ed" />
   <Project Path="AWPS.IoT/AWPS.IoT.nfproj" Type="11a8dd76-328b-46df-9f39-f559912d0360">
     <Deploy />
   </Project>

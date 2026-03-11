@@ -177,7 +177,7 @@ namespace AWPS.IoT
                 }
                 else
                 {
-                    if(WebServer.IsRunning is true)
+                    if(WebServer is not null && WebServer.IsRunning is true)
                     {
                         WebServer.Stop();
                         Debug.WriteLine("WebServer stopped");
@@ -194,6 +194,7 @@ namespace AWPS.IoT
             Debug.WriteLine($"Enter deep sleep. Restart in: {restart_in}");
             Sleep.EnableWakeupByTimer(restart_in);
             Sleep.StartDeepSleep();
+            throw new Exception("Impossible exception");
         }
         private static void EnsureUtcNowIsValid()
         {
