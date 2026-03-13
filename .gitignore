@@ -368,3 +368,4 @@ FodyWeavers.xsd
 /AWPS.IoT.Server/MqttInteraction/ServerCertificate.crt
 /AWPS.IoT.Server/MqttInteraction/MqttResources.resx
 /AWPS.IoT.Server/MqttInteraction/MqttResources.Designer.cs
+/AWPS.IoT/.vscode

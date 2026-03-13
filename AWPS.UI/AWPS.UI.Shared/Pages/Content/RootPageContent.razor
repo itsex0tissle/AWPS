@@ -1,7 +1,70 @@
-@inject IApplicationDatabaseInteractor DatabaseInteractor
+﻿@inject IApplicationDatabaseInteractor DatabaseInteractor
 
-<PageTitle>Home</PageTitle>
+<div class="p-6">
+    <div class="mb-6 flex items-center justify-between">
+        <h1 class="text-3xl font-bold text-gray-800">Sensor Measurements</h1>
+        <a href="/configuration" class="rounded-lg bg-blue-600 px-4 py-2 text-white shadow hover:bg-blue-700">Configure</a>
+    </div>
+    <div class="rounded-xl bg-white p-6 shadow">
+        <div class="mb-4">
+            <label class="mb-1 block text-sm font-medium text-gray-600">Select parameter</label>
+            <select @bind="SelectedMetric" class="w-64 rounded-lg border px-3 py-2">
+                <option value="Light">Light</option>
+                <option value="Moisture">Soil Moisture</option>
+                <option value="Humidity">Air Humidity</option>
+                <option value="Temperature">Temperature</option>
+            </select>
+        </div>
+        <ApexChart TItem="MeasuringDataModel" Options="ChartOptions" @ref="Chart">
+            <ApexPointSeries TItem="MeasuringDataModel" Items="Data" Name="@SelectedMetric" XValue="@(x => x.Timestamp)" YValue="GetYValue" />
+        </ApexChart>
+    </div>
+</div>
 
-<h1>Hello, world!</h1>
+@code
+{
+    private MeasuringDataModel[] Data = [];
+    private ApexChart<MeasuringDataModel>? Chart;
+    private string SelectedMetric = "Light";
+    private ApexChartOptions<MeasuringDataModel> ChartOptions = new();
 
-<div>@JsonSerializer.Serialize(DatabaseInteractor.GetMeasuringDataSet())</div>
+    protected override void OnInitialized()
+    {
+        Data = DatabaseInteractor.GetMeasuringDataSet();
+        ChartOptions = new ApexChartOptions<MeasuringDataModel>
+        {
+            Chart = new Chart
+            {
+                Type = ChartType.Line,
+                Height = 350
+            },
+            Stroke = new Stroke
+            {
+                Curve = new CurveSelections(Curve.Smooth)
+            },
+            Xaxis = new XAxis
+            {
+                Type = XAxisType.Datetime
+            }
+        };
+    }
+
+    private decimal? GetYValue(MeasuringDataModel m)
+    {
+        return SelectedMetric switch
+        {
+            "Light" => m.Light,
+            "Moisture" => m.Moisture,
+            "Humidity" => m.Humidity,
+            "Temperature" => m.Temperature,
+            _ => 0
+        };
+    }
+    protected override async Task OnParametersSetAsync()
+    {
+        if(Chart != null)
+        {
+            await Chart.UpdateSeriesAsync();
+        }
+    }
+}

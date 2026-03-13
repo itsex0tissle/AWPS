@@ -10,22 +10,42 @@ namespace AWPS.IoT.WebControllers
 {
     public sealed class Wireless80211WebController
     {
+        #region Static
+        private static void SetHeaders(HttpListenerResponse response)
+        {
+            response.Headers.Set("Access-Control-Allow-Origin", "*");
+            response.Headers.Set("Access-Control-Allow-Headers", "*");
+            response.Headers.Set("Access-Control-Allow-Methods", "GET, POST");
+        }
+        private static void SendStatusCode(HttpListenerResponse response, HttpStatusCode status_code)
+        {
+            SetHeaders(response);
+            response.ContentType = null;
+            response.ContentLength64 = 0;
+            response.StatusCode = (int)status_code;
+            response.Close();
+        }
+        private static void SendStream(HttpListenerResponse response, string content_type, byte[] content)
+        {
+            SetHeaders(response);
+            response.ContentType = content_type;
+            response.ContentLength64 = content.Length;
+            response.OutputStream.Write(content, 0, content.Length);
+        }
+        #endregion
+
+        #region Instance
         [Route("wifi")]
         [Method("GET")]
         public void GetWifiStatus(WebServerEventArgs event_args)
         {
             Debug.WriteLine("GET request on path 'wifi'");
-            byte[] response = new GetWifiStatusResponseRecord()
+            Wireless80211WebController.SendStream(event_args.Context.Response, "application/octet-stream", new GetWifiStatusResponseRecord()
             {
                 Connected = Wireless80211.Connected,
                 SSID = Wireless80211.GetConfiguration().Ssid
-            }.Serialize();
-            event_args.Context.Response.StatusCode = (int)HttpStatusCode.OK;
-            event_args.Context.Response.StatusDescription = "OK";
-            event_args.Context.Response.ContentType = "application/octet-stream";
-            event_args.Context.Response.ContentLength64 = response.Length;
-            event_args.Context.Response.OutputStream.Write(response, 0, response.Length);
-            Debug.WriteLine("GET response on path 'wifi'");
+            }.Serialize());
+            Debug.WriteLine($"GET response on path 'wifi'");
         }
 
         [Route("wifi")]
@@ -39,7 +59,7 @@ namespace AWPS.IoT.WebControllers
                 PostWifiRequestRecord request = new();
                 request.Deserialize(data);
                 WifiConnectionStatus status = Wireless80211.TryConnect(request.SSID, request.Password);
-                data = new PostWifiResponseRecord()
+                Wireless80211WebController.SendStream(event_args.Context.Response, "application/octet-stream", new PostWifiResponseRecord()
                 {
                     Success = status is WifiConnectionStatus.Success,
                     Description = status switch
@@ -47,24 +67,28 @@ namespace AWPS.IoT.WebControllers
                         WifiConnectionStatus.AccessRevoked => "Access revoked",
                         WifiConnectionStatus.InvalidCredential => "Invalid password",
                         WifiConnectionStatus.NetworkNotAvailable => "Network not found",
+                        WifiConnectionStatus.Success => "Success",
                         WifiConnectionStatus.Timeout => "Timeout",
                         WifiConnectionStatus.UnsupportedAuthenticationProtocol => "Unsupported authentication protocol",
                         _ => "Unexpected error"
                     }
-                }.Serialize();
-                event_args.Context.Response.StatusCode = (int)HttpStatusCode.OK;
-                event_args.Context.Response.StatusDescription = "OK";
-                event_args.Context.Response.ContentType = "application/octet-stream";
-                event_args.Context.Response.ContentLength64 = data.Length;
-                event_args.Context.Response.OutputStream.Write(data, 0, data.Length);
-                Debug.WriteLine("POST response on path 'wifi'");
+                }.Serialize());
             }
             catch
             {
-                Debug.WriteLine("POST response on path 'wifi': StatusCode = 400; Description = 'Invalid body'");
-                event_args.Context.Response.StatusDescription = "Invalid body";
-                WebServer.OutputHttpCode(event_args.Context.Response, HttpStatusCode.BadRequest);
+                Wireless80211WebController.SendStatusCode(event_args.Context.Response, HttpStatusCode.BadRequest);
             }
+            Debug.WriteLine("POST response on path 'wifi'");
         }
+
+        [Route("wifi")]
+        [Method("OPTIONS")]
+        public void OptionsWifi(WebServerEventArgs event_args)
+        {
+            Debug.WriteLine("OPTIONS request on path 'wifi'");
+            Wireless80211WebController.SendStatusCode(event_args.Context.Response, HttpStatusCode.OK);
+            Debug.WriteLine("OPTIONS response on path 'wifi'");
+        }
+        #endregion
     }
 }

@@ -1,0 +1,149 @@
+﻿@inject IHttpClientFactory HttpFactory
+
+@if(base.RendererInfo.IsInteractive is false)
+{
+    <div class="flex h-96 items-center justify-center">
+        <div class="text-center">
+            <div class="mx-auto h-16 w-16 animate-spin rounded-full border-b-2 border-blue-600"></div>
+            <p class="mt-4 text-lg text-gray-600">Loading page...</p>
+        </div>
+    </div>
+}
+else
+{
+    <div class="mx-auto max-w-xl p-6">
+        <h1 class="mb-6 text-3xl font-bold text-gray-800">Device Configuration</h1>
+        <div class="mb-6 rounded-xl bg-white p-4 shadow">
+            <div class="mb-2 flex items-center justify-between">
+                <h2 class="text-lg font-semibold">WiFi Status</h2>
+                <button class="rounded bg-gray-200 px-3 py-1 hover:bg-gray-300" @onclick="RefreshStatus">Refresh</button>
+            </div>
+            @if(WifiStatus is null)
+            {
+                <p class="text-gray-500">Loading status...</p>
+            }
+            else
+            {
+                <div class="space-y-1">
+                    <p>
+                        <span>Status: </span>
+                        @if(WifiStatus.Connected)
+                        {
+                            <span class="font-semibold text-green-600">Connected</span>
+                        }
+                        else
+                        {
+                            <span class="font-semibold text-red-600">Disconnected</span>
+                        }
+                    </p>
+                    <p>
+                        <span>SSID: </span>
+                        <span class="font-mono">@WifiStatus.SSID</span>
+                    </p>
+                </div>
+            }
+        </div>
+        <div class="rounded-xl bg-white p-4 shadow">
+            <h2 class="mb-4 text-lg font-semibold">Configure WiFi</h2>
+            <div class="space-y-3">
+                <div>
+                    <label class="mb-1 block text-sm text-gray-600">SSID</label>
+                    <input class="w-full rounded border px-3 py-2" @bind="Ssid" />
+                </div>
+                <div>
+                    <label class="mb-1 block text-sm text-gray-600">Password</label>
+                    <input type="password" class="w-full rounded border px-3 py-2" @bind="Password" />
+                </div>
+                <button class="rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700" @onclick="SubmitWifi">Connect</button>
+            </div>
+            @if(PostResult is not null)
+            {
+                <div class="mt-4 text-sm">
+                    @if(PostResult.Success)
+                    {
+                        <p class="text-green-600">@PostResult.Description</p>
+                    }
+                    else
+                    {
+                        <p class="text-red-600">@PostResult.Description</p>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+}
+
+@code
+{
+    private const string GetWifiStatusUrl = "http://192.168.4.1/wifi";
+    private const string PostWifiUrl = "http://192.168.4.1/wifi";
+
+    private GetWifiStatusResponseRecord? WifiStatus;
+    private PostWifiResponseRecord? PostResult;
+
+    private string Ssid = "";
+    private string Password = "";
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if(firstRender && base.RendererInfo.IsInteractive)
+        {
+            await RefreshStatus();
+        }
+    }
+
+    private async Task RefreshStatus()
+    {
+        try
+        {
+            HttpClient client = HttpFactory.CreateClient();
+            byte[] data = await client.GetByteArrayAsync(GetWifiStatusUrl);
+            GetWifiStatusResponseRecord record = new();
+            record.Deserialize(data);
+            WifiStatus = record;
+        }
+        catch(Exception exc)
+        {
+            Console.WriteLine(exc);
+            WifiStatus = new GetWifiStatusResponseRecord()
+            {
+                Connected = false,
+                SSID = "Unknown"
+            };
+        }
+        StateHasChanged();
+    }
+    private async Task SubmitWifi()
+    {
+        try
+        {
+            using HttpClient client = HttpFactory.CreateClient();
+            PostWifiRequestRecord request = new()
+            {
+                SSID = Ssid,
+                Password = Password
+            };
+            byte[] body = request.Serialize();
+            using ByteArrayContent content = new(body);
+            content.Headers.ContentType = new("application/octet-stream");
+            HttpResponseMessage response = await client.PostAsync(PostWifiUrl, content);
+            byte[] data = await response.Content.ReadAsByteArrayAsync();
+            PostWifiResponseRecord result = new();
+            result.Deserialize(data);
+            PostResult = result;
+            if(result.Success)
+            {
+                await RefreshStatus();
+            }
+        }
+        catch(Exception exc)
+        {
+            Console.WriteLine(exc);
+            PostResult = new PostWifiResponseRecord()
+            {
+                Success = false,
+                Description = "Request failed"
+            };
+        }
+    }
+}
