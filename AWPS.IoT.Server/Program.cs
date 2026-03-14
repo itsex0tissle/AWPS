@@ -1,5 +1,6 @@
 using MQTTnet;
 using AWPS.IoT.Server.EFCore;
+using AWPS.IoT.Server.SignalR;
 using Microsoft.EntityFrameworkCore;
 using AWPS.IoT.Server.MqttInteraction;
 
@@ -10,6 +11,7 @@ builder.Services.AddDbContextFactory<ApplicationDatabase>(options =>
 {
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new Exception("Connection string not found"));
 });
+builder.Services.AddSignalR();
 
 WebApplication app = builder.Build();
 using(IServiceScope scope = app.Services.CreateScope())
@@ -25,4 +27,5 @@ using(IServiceScope scope = app.Services.CreateScope())
     Console.WriteLine("Starting MqttInteractor");
     await scope.ServiceProvider.GetRequiredService<MqttInteractor>().StartAsync();
 }
+app.MapHub<ClientHub>("/client-hub");
 app.Run();

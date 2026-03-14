@@ -4,6 +4,7 @@ using AWPS.UI.Web.Services;
 using AWPS.IoT.Server.EFCore;
 using AWPS.UI.Shared.Services;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.SignalR.Client;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents().AddInteractiveServerComponents().AddInteractiveWebAssemblyComponents();
@@ -12,6 +13,10 @@ builder.Services.AddDbContextFactory<ApplicationDatabase>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new Exception("Connection string not found"));
 });
 builder.Services.AddScoped<IApplicationDatabaseInteractor, ApplicationDatabaseInteractor>();
+builder.Services.AddScoped(static HubConnection(IServiceProvider provider) =>
+{
+    return new HubConnectionBuilder().WithUrl("https://localhost:7022/client-hub").WithAutomaticReconnect().Build();
+});
 builder.Services.AddApexCharts();
 builder.Services.AddHttpClient();
 

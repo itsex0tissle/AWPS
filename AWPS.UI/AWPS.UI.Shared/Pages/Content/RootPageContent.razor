@@ -1,4 +1,14 @@
-﻿@inject IApplicationDatabaseInteractor DatabaseInteractor
+﻿@inject HubConnection HubConnection
+@inject IApplicationDatabaseInteractor DatabaseInteractor
+@implements IAsyncDisposable
+@code
+{
+    public async ValueTask DisposeAsync()
+    {
+        HubConnection.Remove("UpdateClient");
+        await HubConnection.StopAsync();
+    }
+}
 
 <div class="p-6">
     <div class="mb-6 flex items-center justify-between">
@@ -36,7 +46,7 @@
     } = "Light";
     private ApexChartOptions<MeasuringDataModel> ChartOptions = new();
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
         Data = DatabaseInteractor.GetMeasuringDataSet();
         ChartOptions = new ApexChartOptions<MeasuringDataModel>
@@ -55,6 +65,16 @@
                 Type = XAxisType.Datetime
             }
         };
+        HubConnection.On("UpdateClient", async void() =>
+        {
+            Data = DatabaseInteractor.GetMeasuringDataSet();
+            if(Chart is not null)
+            {
+                await Chart.UpdateSeriesAsync();
+            }
+            await InvokeAsync(StateHasChanged);
+        });
+        await HubConnection.StartAsync();
     }
 
     private decimal? GetYValue(MeasuringDataModel m)

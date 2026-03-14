@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AWPS.IoT.Server.EFCore.Migrations
 {
     [DbContext(typeof(ApplicationDatabase))]
-    [Migration("20260311145722_Migration0")]
+    [Migration("20260314154639_Migration0")]
     partial class Migration0
     {
         /// <inheritdoc />

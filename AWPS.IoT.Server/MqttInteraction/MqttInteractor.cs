@@ -4,6 +4,8 @@ using System.Text.Json;
 using MQTTnet.Protocol;
 using MQTTnet.Formatter;
 using AWPS.IoT.Server.EFCore;
+using AWPS.IoT.Server.SignalR;
+using Microsoft.AspNetCore.SignalR;
 using AWPS.IoT.Server.EFCore.Models;
 using Microsoft.EntityFrameworkCore;
 using AWPS.IoT.Server.BinaryRecords;
@@ -17,9 +19,10 @@ public sealed class MqttInteractor
 {
     private IMqttClient Client { get; set; }
     private MqttClientOptions ClientOptions { get; set; }
+    private IHubContext<ClientHub> SignalRHub { get; set; }
     private IDbContextFactory<ApplicationDatabase> DatabaseFactory { get; set; }
 
-    public MqttInteractor(MqttClientFactory factory, IDbContextFactory<ApplicationDatabase> database_factory)
+    public MqttInteractor(MqttClientFactory factory, IDbContextFactory<ApplicationDatabase> database_factory, IHubContext<ClientHub> signalr_hub)
     {
         MqttClientOptionsBuilder builder = factory.CreateClientOptionsBuilder();
         builder.WithTcpServer(MqttResources.ServerUrl, 8883);
@@ -37,6 +40,7 @@ public sealed class MqttInteractor
         ClientOptions = builder.Build();
         Client = factory.CreateMqttClient();
         DatabaseFactory = database_factory;
+        SignalRHub = signalr_hub;
     }
 
     public async Task StartAsync()
@@ -86,6 +90,7 @@ public sealed class MqttInteractor
                                 database.SaveChanges();
                             }
                             await Client.PublishStringAsync("measuring-data/response", "true", MqttQualityOfServiceLevel.AtLeastOnce);
+                            await SignalRHub.Clients.All.SendAsync("UpdateClient");
                         }
                         catch(Exception exc)
                         {
