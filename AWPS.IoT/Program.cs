@@ -35,6 +35,7 @@ namespace AWPS.IoT
     {
         private static WebServer? WebServer { get; set; }
         private static Timer? WirelessAPTimer { get; set; }
+        private static GpioButton? Button { get; set; }
 
         [Conditional("DEBUG")] private static void SetupLogs()
         {
@@ -71,31 +72,8 @@ namespace AWPS.IoT
         }
         private static void SetupButton()
         {
-            if(Sleep.GetWakeupCause() is Sleep.WakeupCause.Timer)
-            {
-                Debug.WriteLine("Wakeup cause is timer. No sense to enable button at all");
-                return;
-            }
-            GpioButton button = new(21, TimeSpan.FromTicks(15000000L), TimeSpan.FromSeconds(3))
-            {
-                IsHoldingEnabled = true
-            };
-            button.Press += ToogleWirelessAP;
-            button.Holding += ResetMeasuringData;
-            Debug.Write("Button enabled");
-            if(WirelessAP.Enabled is false)
-            {
-                Debug.WriteLine(". Disabling in 10s");
-                Thread.Sleep(10000);
-                button.Press -= ToogleWirelessAP;
-                button.Holding -= ResetMeasuringData;
-                button.Dispose();
-                Debug.WriteLine("Button disabled");
-                return;
-            }
-            Debug.WriteLine();
-
-            static void ToogleWirelessAP(object sender, EventArgs event_args)
+            Button = new GpioButton(21);
+            Button.Press += static delegate(object sender, EventArgs event_args)
             {
                 if(WirelessAP.Enabled is false)
                 {
@@ -105,14 +83,8 @@ namespace AWPS.IoT
                 {
                     WirelessAP.Disable();
                 }
-            }
-            static void ResetMeasuringData(object sender, ButtonHoldingEventArgs event_args)
-            {
-                if(event_args.HoldingState is ButtonHoldingState.Started)
-                {
-                    MeasuringDataFile.Reset();
-                }
-            }
+            };
+            Debug.Write("Button enabled");
         }
         private static void StartDhcpServerIfWirelessAPEnabled()
         {
