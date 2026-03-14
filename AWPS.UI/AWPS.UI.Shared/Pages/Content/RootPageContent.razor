@@ -3,7 +3,7 @@
 <div class="p-6">
     <div class="mb-6 flex items-center justify-between">
         <h1 class="text-3xl font-bold text-gray-800">Sensor Measurements</h1>
-        <a href="/configuration" class="rounded-lg bg-blue-600 px-4 py-2 text-white shadow hover:bg-blue-700">Configure</a>
+        <a href="/configuration" class="rounded-lg bg-blue-600 px-4 py-2 text-white shadow hover:bg-blue-700">Configure Device</a>
     </div>
     <div class="rounded-xl bg-white p-6 shadow">
         <div class="mb-4">
@@ -25,7 +25,15 @@
 {
     private MeasuringDataModel[] Data = [];
     private ApexChart<MeasuringDataModel>? Chart;
-    private string SelectedMetric = "Light";
+    private string SelectedMetric
+    {
+        get => field;
+        set
+        {
+            field = value;
+            _ = Chart?.UpdateSeriesAsync();
+        }
+    } = "Light";
     private ApexChartOptions<MeasuringDataModel> ChartOptions = new();
 
     protected override void OnInitialized()
