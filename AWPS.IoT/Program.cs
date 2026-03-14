@@ -164,6 +164,7 @@ namespace AWPS.IoT
                 {
                     WebServer ??= new WebServer(80, HttpProtocol.Http, IPAddress.Parse(WirelessAP.IP), new Type[]
                     {
+                        typeof(RootWebController),
                         typeof(Wireless80211WebController)
                     });
                     if(WebServer.Start() is true)

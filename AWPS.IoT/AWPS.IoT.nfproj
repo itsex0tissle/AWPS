@@ -34,6 +34,8 @@
     <Compile Include="WebControllers\Records\GetWifiStatusResponseRecord.cs" />
     <Compile Include="WebControllers\Records\PostWifiRequestRecord.cs" />
     <Compile Include="WebControllers\Records\PostWifiResponseRecord.cs" />
+    <Compile Include="WebControllers\ResponseHelper.cs" />
+    <Compile Include="WebControllers\RootWebController.cs" />
     <Compile Include="WebControllers\Wireless80211WebController.cs" />
     <Compile Include="Wireless80211.cs" />
     <Compile Include="WirelessAP.cs" />
