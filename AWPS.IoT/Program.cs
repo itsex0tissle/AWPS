@@ -13,8 +13,6 @@
  * nanoFramework.Hardware.Esp32;
  */
 
-#nullable enable
-
 using System;
 using System.Net;
 using System.Threading;

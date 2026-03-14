@@ -1,6 +1,4 @@
-﻿#nullable enable
-
-namespace AWPS.IoT.BinaryRecords
+﻿namespace AWPS.IoT.BinaryRecords
 {
     public enum BinaryRecordType : byte
     {

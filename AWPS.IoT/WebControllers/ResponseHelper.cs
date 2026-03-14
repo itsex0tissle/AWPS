@@ -1,6 +1,4 @@
-﻿#nullable enable
-
-using System.Net;
+﻿using System.Net;
 
 namespace AWPS.IoT.WebControllers
 {

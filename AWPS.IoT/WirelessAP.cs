@@ -1,6 +1,4 @@
-﻿#nullable enable
-
-using System;
+﻿using System;
 using System.Diagnostics;
 using nanoFramework.Runtime.Native;
 using System.Net.NetworkInformation;

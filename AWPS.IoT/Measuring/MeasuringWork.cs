@@ -1,6 +1,4 @@
-﻿#nullable enable
-
-using System;
+﻿using System;
 using System.Device.Adc;
 using System.Diagnostics;
 using Iot.Device.DHTxx.Esp32;

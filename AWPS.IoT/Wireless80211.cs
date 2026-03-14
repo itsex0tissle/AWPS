@@ -1,6 +1,4 @@
-﻿#nullable enable
-
-using System;
+﻿using System;
 using System.Threading;
 using System.Device.Wifi;
 using System.Diagnostics;

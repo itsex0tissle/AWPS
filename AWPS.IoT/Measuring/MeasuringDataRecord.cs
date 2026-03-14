@@ -1,6 +1,4 @@
-﻿#nullable enable
-
-using System;
+﻿using System;
 using AWPS.IoT.BinaryRecords;
 
 namespace AWPS.IoT.Measuring

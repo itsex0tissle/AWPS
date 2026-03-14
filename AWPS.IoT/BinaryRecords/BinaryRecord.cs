@@ -1,6 +1,4 @@
-﻿#nullable enable
-
-using System;
+﻿using System;
 using System.Text;
 using System.Collections;
 using AWPS.IoT.Measuring;

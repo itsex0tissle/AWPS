@@ -1,6 +1,4 @@
-﻿#nullable enable
-
-using AWPS.IoT.BinaryRecords;
+﻿using AWPS.IoT.BinaryRecords;
 
 namespace AWPS.IoT.WebControllers.Records
 {

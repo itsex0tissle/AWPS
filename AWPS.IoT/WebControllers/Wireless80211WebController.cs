@@ -1,6 +1,4 @@
-﻿#nullable enable
-
-using System.Net;
+﻿using System.Net;
 using System.Device.Wifi;
 using System.Diagnostics;
 using nanoFramework.WebServer;
