@@ -1,9 +1,16 @@
-﻿using AWPS.IoT.BinaryRecords;
-
-namespace AWPS.IoT.WebControllers.Records
+﻿namespace AWPS.IoT.BinaryRecords
 {
     public sealed class PostWifiResponseRecord : BinaryRecord
     {
+        #region Static
+        new public static PostWifiResponseRecord Deserialize(byte[] buffer, ref int offset)
+        {
+            BinaryRecord result = new PostWifiResponseRecord();
+            result.Deserialize(buffer, ref offset);
+            return (PostWifiResponseRecord)result;
+        }
+        #endregion
+
         #region Instance
         public bool Success { get; set; } = false;
         public string Description { get; set; } = "";
@@ -12,23 +19,23 @@ namespace AWPS.IoT.WebControllers.Records
         #region BinaryRecord
         protected override int ChildByteLength
         {
-            get => Description.Length + 5;
+            get => sizeof(bool) + BinaryRecord.SizeOfString(Description);
         }
-        public override BinaryRecordType Type
+        public override BinaryRecord.Type RecordType
         {
-            get => BinaryRecordType.PostWifiResponse;
+            get => BinaryRecord.Type.PostWifiResponse;
         }
         public override byte Version
         {
             get => 1;
         }
 
-        protected override void SerializeChild(byte[] buffer, int offset)
+        protected override void SerializeChild(byte[] buffer, ref int offset)
         {
             BinaryRecord.WriteBool(buffer, ref offset, Success);
             BinaryRecord.WriteString(buffer, ref offset, Description);
         }
-        protected override void DeserializeChild(byte[] buffer, int offset)
+        protected override void DeserializeChild(byte[] buffer, ref int offset)
         {
             Success = BinaryRecord.ReadBool(buffer, ref offset);
             Description = BinaryRecord.ReadString(buffer, ref offset);
