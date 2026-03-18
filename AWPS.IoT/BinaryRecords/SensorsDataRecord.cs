@@ -18,7 +18,7 @@
         public byte Humidity { get; set; } = 0;
         #endregion
 
-        #region TimeBinaryRecord
+        #region TimestampBinaryRecord
         protected override int ChildByteLength2
         {
             get => sizeof(byte) + sizeof(byte) + sizeof(sbyte) + sizeof(byte);

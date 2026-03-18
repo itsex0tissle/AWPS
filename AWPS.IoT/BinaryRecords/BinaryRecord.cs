@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Text;
 using System.Collections;
+using AWPS.IoT.BinaryFiles;
 
 namespace AWPS.IoT.BinaryRecords
 {
@@ -284,6 +285,10 @@ namespace AWPS.IoT.BinaryRecords
                 {
                     return SensorsDataRecord.Deserialize(buffer, ref offset);
                 }
+                case BinaryRecord.Type.TimestampMessage:
+                {
+                    return TimestampMessageRecord.Deserialize(buffer, ref offset);
+                }
                 case BinaryRecord.Type.GetWifiStatusResponse:
                 {
                     return GetWifiStatusResponseRecord.Deserialize(buffer, ref offset);
@@ -295,6 +300,10 @@ namespace AWPS.IoT.BinaryRecords
                 case BinaryRecord.Type.PostWifiResponse:
                 {
                     return PostWifiResponseRecord.Deserialize(buffer, ref offset);
+                }
+                case BinaryRecord.Type.MainDataFile:
+                {
+                    return MainDataFile.Deserialize(buffer, ref offset);
                 }
             }
             throw new ArgumentException($"Can`t deserialize the record");
@@ -544,9 +553,11 @@ namespace AWPS.IoT.BinaryRecords
         {
             Unknown,
             SensorsData,
+            TimestampMessage,
             GetWifiStatusResponse,
             PostWifiRequest,
             PostWifiResponse,
+            MainDataFile,
         }
         #endregion
     }
