@@ -3,6 +3,11 @@
     public sealed class SensorsDataRecord : TimestampBinaryRecord
     {
         #region Static
+        public static SensorsDataRecord Deserialize(byte[] buffer)
+        {
+            int offset = 0;
+            return Deserialize(buffer, ref offset);
+        }
         new public static SensorsDataRecord Deserialize(byte[] buffer, ref int offset)
         {
             BinaryRecord result = new SensorsDataRecord();

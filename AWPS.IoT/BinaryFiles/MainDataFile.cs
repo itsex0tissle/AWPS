@@ -18,6 +18,11 @@ namespace AWPS.IoT.BinaryFiles
         {
             return (MainDataFile?)new MainDataFile().Load() ?? new MainDataFile();
         }
+        public static MainDataFile Deserialize(byte[] buffer)
+        {
+            int offset = 0;
+            return Deserialize(buffer, ref offset);
+        }
         new public static MainDataFile Deserialize(byte[] buffer, ref int offset)
         {
             BinaryRecord result = new MainDataFile();

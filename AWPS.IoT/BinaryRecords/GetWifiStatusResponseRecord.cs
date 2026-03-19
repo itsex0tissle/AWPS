@@ -3,6 +3,11 @@
     public sealed class GetWifiStatusResponseRecord : BinaryRecord
     {
         #region Static
+        public static GetWifiStatusResponseRecord Deserialize(byte[] buffer)
+        {
+            int offset = 0;
+            return Deserialize(buffer, ref offset);
+        }
         new public static GetWifiStatusResponseRecord Deserialize(byte[] buffer, ref int offset)
         {
             BinaryRecord result = new GetWifiStatusResponseRecord();

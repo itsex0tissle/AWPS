@@ -3,6 +3,11 @@
     public sealed class PostWifiRequestRecord : BinaryRecord
     {
         #region Static
+        public static PostWifiRequestRecord Deserialize(byte[] buffer)
+        {
+            int offset = 0;
+            return Deserialize(buffer, ref offset);
+        }
         new public static PostWifiRequestRecord Deserialize(byte[] buffer, ref int offset)
         {
             BinaryRecord result = new PostWifiRequestRecord();

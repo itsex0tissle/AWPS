@@ -3,6 +3,11 @@
     public sealed class TimestampMessageRecord : TimestampBinaryRecord
     {
         #region Static
+        public static TimestampMessageRecord Deserialize(byte[] buffer)
+        {
+            int offset = 0;
+            return Deserialize(buffer, ref offset);
+        }
         new public static TimestampMessageRecord Deserialize(byte[] buffer, ref int offset)
         {
             BinaryRecord result = new TimestampMessageRecord();

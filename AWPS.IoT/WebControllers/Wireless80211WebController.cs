@@ -1,8 +1,8 @@
 ﻿using System.Net;
 using System.Device.Wifi;
 using System.Diagnostics;
+using AWPS.IoT.BinaryRecords;
 using nanoFramework.WebServer;
-using AWPS.IoT.WebControllers.Records;
 
 namespace AWPS.IoT.WebControllers
 {
@@ -29,8 +29,7 @@ namespace AWPS.IoT.WebControllers
             byte[] data = event_args.Context.Request.ReadBody();
             try
             {
-                PostWifiRequestRecord request = new();
-                request.Deserialize(data);
+                PostWifiRequestRecord request = PostWifiRequestRecord.Deserialize(data);
                 WifiConnectionStatus status = Wireless80211.TryConnect(request.SSID, request.Password);
                 ResponseHelper.SendStream(event_args.Context.Response, "application/octet-stream", new PostWifiResponseRecord()
                 {
