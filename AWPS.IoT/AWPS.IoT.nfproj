@@ -27,7 +27,7 @@
     <Compile Include="BinaryRecords\TimestampBinaryRecord.cs" />
     <Compile Include="BinaryRecords\SensorsDataRecord.cs" />
     <Compile Include="Helper.cs" />
-    <Compile Include="Measuring\MeasuringWork.cs" />
+    <Compile Include="Works\MeasuringWork.cs" />
     <Compile Include="MqttInteraction\MqttInteractor.cs" />
     <Compile Include="MqttInteraction\MqttResources.Designer.cs">
       <DesignTime>True</DesignTime>
@@ -44,6 +44,7 @@
     <Compile Include="WebControllers\Wireless80211WebController.cs" />
     <Compile Include="Wireless80211.cs" />
     <Compile Include="WirelessAP.cs" />
+    <Compile Include="Works\MqttWork.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Iot.Device.Button">

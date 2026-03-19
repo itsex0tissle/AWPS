@@ -16,7 +16,8 @@ namespace AWPS.IoT.BinaryFiles
 
         private static MainDataFile InitLoad()
         {
-            return (MainDataFile?)new MainDataFile().Load() ?? new MainDataFile();
+            MainDataFile file = new();
+            return (file.Load() is MainDataFile loaded_file) ? loaded_file : file;
         }
         public static MainDataFile Deserialize(byte[] buffer)
         {

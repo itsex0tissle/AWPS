@@ -18,34 +18,31 @@ using System.Net;
 using System.Threading;
 using Iot.Device.Button;
 using System.Diagnostics;
-using AWPS.IoT.Measuring;
 using Iot.Device.DhcpServer;
 using nanoFramework.WebServer;
 using AWPS.IoT.WebControllers;
-using AWPS.IoT.MqttInteraction;
 using nanoFramework.Networking;
-using nanoFramework.Hardware.Esp32;
 using nanoFramework.Runtime.Native;
 using System.Net.NetworkInformation;
-using System.Diagnostics.CodeAnalysis;
+using AWPS.IoT.Works;
 
 namespace AWPS.IoT
 {
     public static class Program
     {
+        private static GpioButton? Button { get; set; }
         private static WebServer? WebServer { get; set; }
         private static Timer? WirelessAPTimer { get; set; }
-        private static GpioButton? Button { get; set; }
 
         [Conditional("DEBUG")] private static void SetupLogs()
         {
-            Power.OnRebootEvent += delegate()
+            Power.OnRebootEvent += delegate ()
             {
                 Debug.WriteLine("Rebooting...");
             };
-            NetworkChange.NetworkAddressChanged += delegate(object sender, EventArgs event_args)
+            NetworkChange.NetworkAddressChanged += delegate (object sender, EventArgs event_args)
             {
-                if(Wireless80211.Connected is true)
+                if (Wireless80211.Connected is true)
                 {
                     Debug.WriteLine("Wifi connected");
                 }
@@ -54,9 +51,9 @@ namespace AWPS.IoT
                     Debug.WriteLine("Wifi disconnected");
                 }
             };
-            NetworkChange.NetworkAPStationChanged += delegate(int station_index, NetworkAPStationEventArgs event_args)
+            NetworkChange.NetworkAPStationChanged += delegate (int station_index, NetworkAPStationEventArgs event_args)
             {
-                if(event_args.IsConnected is true)
+                if (event_args.IsConnected is true)
                 {
                     Debug.WriteLine("External device connected to AP");
                 }
@@ -65,7 +62,7 @@ namespace AWPS.IoT
                     Debug.WriteLine("External device disconnected from AP");
                 }
             };
-            if(Wireless80211.Connected is true)
+            if (Wireless80211.Connected is true)
             {
                 Debug.WriteLine("Wifi connected");
             }
@@ -73,9 +70,9 @@ namespace AWPS.IoT
         private static void SetupButton()
         {
             Button = new GpioButton(21);
-            Button.Press += static delegate(object sender, EventArgs event_args)
+            Button.Press += static delegate (object sender, EventArgs event_args)
             {
-                if(WirelessAP.Enabled is false)
+                if (WirelessAP.Enabled is false)
                 {
                     WirelessAP.Enable();
                 }
@@ -88,9 +85,9 @@ namespace AWPS.IoT
         }
         private static void StartDhcpServerIfWirelessAPEnabled()
         {
-            if(WirelessAP.Enabled is true)
+            if (WirelessAP.Enabled is true)
             {
-                if(new DhcpServer().Start(IPAddress.Parse(WirelessAP.IP), IPAddress.Parse(WirelessAP.Mask)) is false)
+                if (new DhcpServer().Start(IPAddress.Parse(WirelessAP.IP), IPAddress.Parse(WirelessAP.Mask)) is false)
                 {
                     Debug.WriteLine("DHCP-server start failed");
                     Power.RebootDevice();
@@ -100,7 +97,7 @@ namespace AWPS.IoT
         }
         private static void EnableTimeoutForWirelessAP()
         {
-            if(WirelessAP.Enabled is true)
+            if (WirelessAP.Enabled is true)
             {
                 WirelessAPTimer = new Timer(DisableWirelessAP, null, 60000, Timeout.Infinite);
                 NetworkChange.NetworkAPStationChanged += delegate (int station_index, NetworkAPStationEventArgs event_args)
@@ -128,16 +125,16 @@ namespace AWPS.IoT
         }
         private static void SetupTooglingWebServerBasedOnAP()
         {
-            NetworkChange.NetworkAPStationChanged += delegate(int station_index, NetworkAPStationEventArgs event_args)
+            NetworkChange.NetworkAPStationChanged += delegate (int station_index, NetworkAPStationEventArgs event_args)
             {
-                if(event_args.IsConnected is true)
+                if (event_args.IsConnected is true)
                 {
                     WebServer ??= new WebServer(80, HttpProtocol.Http, IPAddress.Parse(WirelessAP.IP), new Type[]
                     {
                         typeof(RootWebController),
                         typeof(Wireless80211WebController)
                     });
-                    if(WebServer.Start() is true)
+                    if (WebServer.Start() is true)
                     {
                         Debug.WriteLine($"WebServer started. Listening on: 'http://{WirelessAP.IP}:80'");
                     }
@@ -148,7 +145,7 @@ namespace AWPS.IoT
                 }
                 else
                 {
-                    if(WebServer is not null && WebServer.IsRunning is true)
+                    if (WebServer is not null && WebServer.IsRunning is true)
                     {
                         WebServer.Stop();
                         Debug.WriteLine("WebServer stopped");
@@ -160,13 +157,6 @@ namespace AWPS.IoT
         {
             WifiNetworkHelper.Reconnect(requiresDateTime: true);
         }
-        [DoesNotReturn] private static void EnterDeepSleep(TimeSpan restart_in)
-        {
-            Debug.WriteLine($"Enter deep sleep. Restart in: {restart_in}");
-            Sleep.EnableWakeupByTimer(restart_in);
-            Sleep.StartDeepSleep();
-            throw new Exception("Impossible exception");
-        }
         private static void EnsureUtcNowIsValid()
         {
             if(DateTime.UtcNow.Year > 2025)
@@ -175,15 +165,7 @@ namespace AWPS.IoT
                 return;
             }
             Debug.WriteLine("System time is not UTC");
-            EnterDeepSleep(TimeSpan.FromMinutes(5));
-        }
-        private static void StartMeasuringData()
-        {
-            MeasuringWork.Start();
-        }
-        private static void StartMqttInteractor()
-        {
-            MqttInteractor.Start();
+            Helper.EnterDeepSleep(TimeSpan.FromMinutes(5));
         }
         public static void Main()
         {
@@ -201,9 +183,9 @@ namespace AWPS.IoT
             Debug.WriteLine("Device mode: Normal");
             TryReconnectToWifi();
             EnsureUtcNowIsValid();
-            StartMeasuringData();
-            StartMqttInteractor();
-            EnterDeepSleep(TimeSpan.FromSeconds(30));
+            MeasuringWork.Start();
+            MqttWork.Start();
+            Helper.EnterDeepSleep(TimeSpan.FromSeconds(30));
         }
     }
 }
