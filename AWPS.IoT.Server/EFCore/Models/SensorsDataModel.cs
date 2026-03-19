@@ -1,14 +1,14 @@
-﻿using System.ComponentModel.DataAnnotations;
-using AWPS.IoT.Server.BinaryRecords.Measuring;
+﻿using AWPS.IoT.BinaryRecords;
+using System.ComponentModel.DataAnnotations;
 
 namespace AWPS.IoT.Server.EFCore.Models;
 
-public sealed class MeasuringDataModel
+public sealed class SensorsDataModel
 {
     #region Static
-    public static MeasuringDataModel CreateFromRecord(MeasuringDataRecord record)
+    public static SensorsDataModel CreateFromRecord(SensorsDataRecord record)
     {
-        return new MeasuringDataModel()
+        return new SensorsDataModel()
         {
             Timestamp = record.Timestamp,
             Light = record.Light,

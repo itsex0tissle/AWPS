@@ -3,14 +3,14 @@ using System.Buffers;
 using System.Text.Json;
 using MQTTnet.Protocol;
 using MQTTnet.Formatter;
+using AWPS.IoT.BinaryFiles;
 using AWPS.IoT.Server.EFCore;
+using AWPS.IoT.BinaryRecords;
 using AWPS.IoT.Server.SignalR;
 using Microsoft.AspNetCore.SignalR;
 using AWPS.IoT.Server.EFCore.Models;
 using Microsoft.EntityFrameworkCore;
-using AWPS.IoT.Server.BinaryRecords;
 using System.Security.Authentication;
-using AWPS.IoT.Server.BinaryRecords.Measuring;
 using System.Security.Cryptography.X509Certificates;
 
 namespace AWPS.IoT.Server.MqttInteraction;
@@ -63,20 +63,20 @@ public sealed class MqttInteractor
                     }
                 }
                 Client.ApplicationMessageReceivedAsync += Client_ApplicationMessageReceivedAsync;
-                await Client.SubscribeAsync("measuring-data/request", MqttQualityOfServiceLevel.AtLeastOnce);
+                await Client.SubscribeAsync("sensors-data/request", MqttQualityOfServiceLevel.AtLeastOnce);
                 return;
 
                 async Task Client_ApplicationMessageReceivedAsync(MqttApplicationMessageReceivedEventArgs event_args)
                 {
-                    if(event_args.ApplicationMessage.Topic is "measuring-data/request")
+                    if(event_args.ApplicationMessage.Topic is "sensors-data/request")
                     {
                         try
                         {
-                            MeasuringDataModel[] models = BinaryRecord.DeserializeEnumerable(event_args.ApplicationMessage.Payload.ToArray()).OfType<MeasuringDataRecord>().Select(MeasuringDataModel.CreateFromRecord).ToArray();
+                            SensorsDataModel[] models = MainDataFile.Deserialize(event_args.ApplicationMessage.Payload.ToArray()).GetRecords().OfType<SensorsDataRecord>().Select(SensorsDataModel.CreateFromRecord).ToArray();
                             Console.WriteLine($"Models: {JsonSerializer.Serialize(models)}");
                             await using(ApplicationDatabase database = DatabaseFactory.CreateDbContext())
                             {
-                                foreach(MeasuringDataModel model in models)
+                                foreach(SensorsDataModel model in models)
                                 {
                                     if(database.MeasuringDataSet.AsNoTracking().FirstOrDefault(db_model => db_model.Timestamp == model.Timestamp) is not null)
                                     {
@@ -89,13 +89,13 @@ public sealed class MqttInteractor
                                 }
                                 database.SaveChanges();
                             }
-                            await Client.PublishStringAsync("measuring-data/response", "true", MqttQualityOfServiceLevel.AtLeastOnce);
+                            await Client.PublishStringAsync("sensors-data/response", "true", MqttQualityOfServiceLevel.AtLeastOnce);
                             await SignalRHub.Clients.All.SendAsync("UpdateClient");
                         }
                         catch(Exception exc)
                         {
                             Console.WriteLine(exc);
-                            await Client.PublishStringAsync("measuring-data/response", "false", MqttQualityOfServiceLevel.AtLeastOnce);
+                            await Client.PublishStringAsync("sensors-data/response", "false", MqttQualityOfServiceLevel.AtLeastOnce);
                         }
                     }
                 }

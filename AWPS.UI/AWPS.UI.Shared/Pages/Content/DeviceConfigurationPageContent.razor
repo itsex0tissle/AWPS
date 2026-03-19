@@ -272,14 +272,9 @@ else
         {
             HttpClient client = HttpFactory.CreateClient();
 
-            byte[] data =
-                await client.GetByteArrayAsync(GetWifiStatusUrl);
+            byte[] data = await client.GetByteArrayAsync(GetWifiStatusUrl);
 
-            GetWifiStatusResponseRecord record = new();
-
-            record.Deserialize(data);
-
-            WifiStatus = record;
+            WifiStatus = GetWifiStatusResponseRecord.Deserialize(data);
         }
         catch
         {
@@ -317,20 +312,15 @@ else
             HttpResponseMessage response =
                 await client.PostAsync(PostWifiUrl, content);
 
-            byte[] data =
-                await response.Content.ReadAsByteArrayAsync();
+            byte[] data = await response.Content.ReadAsByteArrayAsync();
 
-            PostWifiResponseRecord result = new();
+            PostResult = PostWifiResponseRecord.Deserialize(data);
 
-            result.Deserialize(data);
-
-            PostResult = result;
-
-            if(result.Success)
+            if(PostResult.Success)
             {
                 WifiStatus = new GetWifiStatusResponseRecord
                 {
-                    Connected = result.Success,
+                    Connected = PostResult.Success,
                     SSID = Ssid
                 };
             }
