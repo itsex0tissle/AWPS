@@ -169,6 +169,9 @@ namespace AWPS.IoT
         }
         public static void Main()
         {
+#if DEBUG
+            Thread.Sleep(10000); //Allows us to connect external serial port reader
+#endif
             try
             {
                 Debug.WriteLine("Start of program");
