@@ -19,10 +19,14 @@
   </PropertyGroup>
   <Import Project="$(NanoFrameworkProjectSystemPath)NFProjectSystem.props" Condition="Exists('$(NanoFrameworkProjectSystemPath)NFProjectSystem.props')" />
   <ItemGroup>
+    <Compile Include="BinaryFiles\BinaryFile.cs" />
+    <Compile Include="BinaryFiles\RecordsFile.cs" />
+    <Compile Include="BinaryFiles\MainDataFile.cs" />
     <Compile Include="BinaryRecords\BinaryRecord.cs" />
-    <Compile Include="BinaryRecords\BinaryRecordType.cs" />
-    <Compile Include="Measuring\MeasuringDataFile.cs" />
-    <Compile Include="Measuring\MeasuringDataRecord.cs" />
+    <Compile Include="BinaryRecords\TimestampMessageRecord.cs" />
+    <Compile Include="BinaryRecords\TimestampBinaryRecord.cs" />
+    <Compile Include="BinaryRecords\SensorsDataRecord.cs" />
+    <Compile Include="Helper.cs" />
     <Compile Include="Measuring\MeasuringWork.cs" />
     <Compile Include="MqttInteraction\MqttInteractor.cs" />
     <Compile Include="MqttInteraction\MqttResources.Designer.cs">
@@ -32,9 +36,9 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="WebControllers\Records\GetWifiStatusResponseRecord.cs" />
-    <Compile Include="WebControllers\Records\PostWifiRequestRecord.cs" />
-    <Compile Include="WebControllers\Records\PostWifiResponseRecord.cs" />
+    <Compile Include="BinaryRecords\GetWifiStatusResponseRecord.cs" />
+    <Compile Include="BinaryRecords\PostWifiRequestRecord.cs" />
+    <Compile Include="BinaryRecords\PostWifiResponseRecord.cs" />
     <Compile Include="WebControllers\ResponseHelper.cs" />
     <Compile Include="WebControllers\RootWebController.cs" />
     <Compile Include="WebControllers\Wireless80211WebController.cs" />
@@ -49,7 +53,7 @@
       <HintPath>..\packages\nanoFramework.Iot.Device.DhcpServer.1.2.909\lib\Iot.Device.DhcpServer.dll</HintPath>
     </Reference>
     <Reference Include="Iot.Device.Dhtxx.Esp32">
-      <HintPath>..\packages\nanoFramework.Iot.Device.Dhtxx.Esp32.1.2.952\lib\Iot.Device.Dhtxx.Esp32.dll</HintPath>
+      <HintPath>..\packages\nanoFramework.Iot.Device.Dhtxx.Esp32.1.2.955\lib\Iot.Device.Dhtxx.Esp32.dll</HintPath>
     </Reference>
     <Reference Include="mscorlib">
       <HintPath>..\packages\nanoFramework.CoreLibrary.1.17.11\lib\mscorlib.dll</HintPath>
@@ -125,12 +129,6 @@
     </Reference>
     <Reference Include="System.Threading">
       <HintPath>..\packages\nanoFramework.System.Threading.1.1.52\lib\System.Threading.dll</HintPath>
-    </Reference>
-    <Reference Include="UnitsNet.RelativeHumidity">
-      <HintPath>..\packages\UnitsNet.nanoFramework.RelativeHumidity.5.75.0\lib\UnitsNet.RelativeHumidity.dll</HintPath>
-    </Reference>
-    <Reference Include="UnitsNet.Temperature">
-      <HintPath>..\packages\UnitsNet.nanoFramework.Temperature.5.75.0\lib\UnitsNet.Temperature.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
