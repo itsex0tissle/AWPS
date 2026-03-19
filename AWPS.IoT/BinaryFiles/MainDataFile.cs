@@ -11,14 +11,20 @@ namespace AWPS.IoT.BinaryFiles
         private static MainDataFile? instance;
         public static MainDataFile Instance
         {
-            get => instance ??= InitLoad();
+            get
+            {
+                if(instance is null)
+                {
+                    instance = new MainDataFile();
+                    if(instance.Load() is MainDataFile file)
+                    {
+                        instance = file;
+                    }
+                }
+                return instance;
+            }
         }
 
-        private static MainDataFile InitLoad()
-        {
-            MainDataFile file = new();
-            return (file.Load() is MainDataFile loaded_file) ? loaded_file : file;
-        }
         public static MainDataFile Deserialize(byte[] buffer)
         {
             int offset = 0;
@@ -30,7 +36,15 @@ namespace AWPS.IoT.BinaryFiles
             result.Deserialize(buffer, ref offset);
             return (MainDataFile)result;
         }
-        public static void AddSensorsData(double light, double moisture, double temperature, double humidity)
+        #endregion
+
+        #region Instance
+        public MainDataFile() : base(MainDataFile.Path)
+        {
+            
+        }
+
+        public void AddSensorsData(double light, double moisture, double temperature, double humidity)
         {
             SensorsDataRecord record = new()
             {
@@ -39,22 +53,15 @@ namespace AWPS.IoT.BinaryFiles
                 Temperature = (sbyte)Math.Round(temperature),
                 Humidity = (byte)Math.Round(humidity)
             };
-            Instance.Records.Add(record);
+            base.Records.Add(record);
         }
-        public static void AddMessage(string message)
+        public void AddMessage(string message)
         {
             TimestampMessageRecord record = new()
             {
                 Message = message
             };
-            Instance.Records.Add(record);
-        }
-        #endregion
-
-        #region Instance
-        public MainDataFile() : base(MainDataFile.Path)
-        {
-            
+            base.Records.Add(record);
         }
         #endregion
 

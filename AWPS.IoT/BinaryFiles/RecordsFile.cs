@@ -7,7 +7,7 @@ namespace AWPS.IoT.BinaryFiles
     {
         #region Instance
         protected abstract int ChildByteLength2 { get; }
-        public ArrayList Records { get; protected set; } = new();
+        protected ArrayList Records { get; set; } = new();
 
         protected RecordsFile(string file_path)
         {
@@ -20,12 +20,18 @@ namespace AWPS.IoT.BinaryFiles
 
         #region BinaryFile
         public override string FilePath { get; }
+
+        public override void Reset()
+        {
+            base.Reset();
+            Records.Clear();
+        }
         #endregion
 
         #region BinaryRecord
         protected override sealed int ChildByteLength
         {
-            get => BinaryRecord.SizeOfCollection(BinaryRecords) + ChildByteLength2;
+            get => BinaryRecord.SizeOfCollection(Records) + ChildByteLength2;
         }
 
         protected override sealed void SerializeChild(byte[] buffer, ref int offset)

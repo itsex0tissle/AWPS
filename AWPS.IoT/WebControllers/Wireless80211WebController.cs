@@ -18,7 +18,7 @@ namespace AWPS.IoT.WebControllers
                 Connected = Wireless80211.Connected,
                 SSID = Wireless80211.GetConfiguration().Ssid
             }.Serialize());
-            Debug.WriteLine($"GET response on path 'wifi'");
+            Debug.WriteLine("GET response on path 'wifi'");
         }
 
         [Route("wifi")]

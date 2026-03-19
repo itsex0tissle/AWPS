@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Text;
+using System.Diagnostics;
 using System.Collections;
 using AWPS.IoT.BinaryFiles;
 
@@ -516,6 +517,7 @@ namespace AWPS.IoT.BinaryRecords
         protected abstract void DeserializeChild(byte[] buffer, ref int offset);
         public void Serialize(byte[] buffer, ref int offset)
         {
+            Debug.WriteLine($"Serializing '{RecordType}' record of '{Version}' version");
             BinaryRecord.WriteByte(buffer, ref offset, (byte)RecordType);
             BinaryRecord.WriteByte(buffer, ref offset, Version);
             SerializeChild(buffer, ref offset);
@@ -532,7 +534,8 @@ namespace AWPS.IoT.BinaryRecords
         }
         public void Deserialize(byte[] buffer, ref int offset)
         {
-            if(BinaryRecord.ReadByte(buffer, ref offset) != (byte)RecordType)
+            Debug.WriteLine($"Deserializing '{RecordType}' record of '{Version}' version");
+            if (BinaryRecord.ReadByte(buffer, ref offset) != (byte)RecordType)
             {
                 throw new InvalidOperationException("Invalid record type in buffer");
             }

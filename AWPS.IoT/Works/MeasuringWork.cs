@@ -11,13 +11,13 @@ namespace AWPS.IoT.Works
         {
             try
             {
+                Debug.WriteLine("Start measuring work");
                 AdcController controller = new();
                 AdcChannel light = controller.OpenChannel(4);
                 AdcChannel moisture = controller.OpenChannel(5);
                 Dht11 dht11 = new(25, 26);
                 Helper.Retry(delegate()
                 {
-                    Debug.WriteLine("Start measuring...");
                     double light_value = light.ReadRatio() * 100;
                     double moisture_value = moisture.ReadRatio() * 100;
                     double temperature_value = dht11.Temperature.DegreesCelsius;
@@ -33,10 +33,10 @@ namespace AWPS.IoT.Works
                         humidity_value += dht11.Humidity.Percent;
                         humidity_value /= 2;
                     }
-                    MainDataFile.AddSensorsData(light_value, moisture_value, temperature_value, humidity_value);
+                    MainDataFile.Instance.AddSensorsData(light_value, moisture_value, temperature_value, humidity_value);
                     MainDataFile.Instance.Save();
-                    Debug.WriteLine("Measuring finished");
                 }, retry);
+                Debug.WriteLine("Measuring work finished");
             }
             catch { }
         }

@@ -15,6 +15,7 @@
 
 using System;
 using System.Net;
+using AWPS.IoT.Works;
 using System.Threading;
 using Iot.Device.Button;
 using System.Diagnostics;
@@ -24,7 +25,6 @@ using AWPS.IoT.WebControllers;
 using nanoFramework.Networking;
 using nanoFramework.Runtime.Native;
 using System.Net.NetworkInformation;
-using AWPS.IoT.Works;
 
 namespace AWPS.IoT
 {
@@ -169,22 +169,26 @@ namespace AWPS.IoT
         }
         public static void Main()
         {
-            Debug.WriteLine("Start of program");
-            SetupLogs();
-            SetupButton();
-            StartDhcpServerIfWirelessAPEnabled();
-            EnableTimeoutForWirelessAP();
-            SetupTooglingWebServerBasedOnAP();
-            if(WirelessAP.Enabled is true)
+            try
             {
-                Debug.WriteLine("Device mode: Configuration");
-                Thread.Sleep(Timeout.Infinite);
+                Debug.WriteLine("Start of program");
+                SetupLogs();
+                SetupButton();
+                StartDhcpServerIfWirelessAPEnabled();
+                EnableTimeoutForWirelessAP();
+                SetupTooglingWebServerBasedOnAP();
+                if(WirelessAP.Enabled is true)
+                {
+                    Debug.WriteLine("Device mode: Configuration");
+                    Thread.Sleep(Timeout.Infinite);
+                }
+                Debug.WriteLine("Device mode: Normal");
+                TryReconnectToWifi();
+                EnsureUtcNowIsValid();
+                MeasuringWork.Start();
+                MqttWork.Start();
             }
-            Debug.WriteLine("Device mode: Normal");
-            TryReconnectToWifi();
-            EnsureUtcNowIsValid();
-            MeasuringWork.Start();
-            MqttWork.Start();
+            catch { }
             Helper.EnterDeepSleep(TimeSpan.FromSeconds(30));
         }
     }

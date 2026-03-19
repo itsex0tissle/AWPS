@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using System.Diagnostics;
 using AWPS.IoT.BinaryRecords;
 
 namespace AWPS.IoT.BinaryFiles
@@ -7,13 +8,14 @@ namespace AWPS.IoT.BinaryFiles
     {
         public abstract string FilePath { get; }
 
-        public void Save()
+        public virtual void Save()
         {
             File.WriteAllBytes(FilePath, base.Serialize());
+            Debug.WriteLine($"'{FilePath}' file saved");
         }
-        public BinaryFile? Load()
+        public virtual BinaryFile? Load()
         {
-            if(File.Exists(FilePath) is false)
+            if (File.Exists(FilePath) is false)
             {
                 return null;
             }
@@ -21,12 +23,14 @@ namespace AWPS.IoT.BinaryFiles
             {
                 int offset = 0;
                 byte[] buffer = File.ReadAllBytes(FilePath);
+                Debug.WriteLine($"'{FilePath}' file loaded");
                 return (BinaryFile)BinaryRecord.ReadRecord(buffer, ref offset);
             }
         }
-        public void Reset()
+        public virtual void Reset()
         {
             File.Delete(FilePath);
+            Debug.WriteLine($"'{FilePath}' file deleted");
         }
     }
 }
