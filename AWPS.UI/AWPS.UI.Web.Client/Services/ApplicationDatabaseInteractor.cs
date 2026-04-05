@@ -10,5 +10,9 @@ public sealed class ApplicationDatabaseInteractor : IApplicationDatabaseInteract
     {
         return [];
     }
+    public void ClearMeasuringData()
+    {
+
+    }
     #endregion
 }

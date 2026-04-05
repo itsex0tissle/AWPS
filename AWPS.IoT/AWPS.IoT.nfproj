@@ -45,6 +45,7 @@
     <Compile Include="Wireless80211.cs" />
     <Compile Include="WirelessAP.cs" />
     <Compile Include="Works\MqttWork.cs" />
+    <Compile Include="Works\WateringWork.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Iot.Device.Button">

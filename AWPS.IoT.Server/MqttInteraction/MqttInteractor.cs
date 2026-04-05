@@ -64,7 +64,7 @@ public sealed class MqttInteractor
                 }
                 Client.ApplicationMessageReceivedAsync += Client_ApplicationMessageReceivedAsync;
                 await Client.SubscribeAsync("sensors-data/request", MqttQualityOfServiceLevel.AtLeastOnce);
-                return;
+                break;
 
                 async Task Client_ApplicationMessageReceivedAsync(MqttApplicationMessageReceivedEventArgs event_args)
                 {
@@ -102,5 +102,21 @@ public sealed class MqttInteractor
             }
             catch { }
         }
+        _ = Task.Run(async void() =>
+        {
+            while(true)
+            {
+                if(Client.IsConnected is false)
+                {
+                    try
+                    {
+                        await Client.ReconnectAsync();
+                        await Client.SubscribeAsync("sensors-data/request", MqttQualityOfServiceLevel.AtLeastOnce);
+                    }
+                    catch { }
+                }
+                Thread.Yield();
+            }
+        });
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Diagnostics;
 using nanoFramework.Hardware.Esp32;
 using System.Diagnostics.CodeAnalysis;
@@ -27,6 +28,15 @@ namespace AWPS.IoT
             Sleep.EnableWakeupByTimer(restart_in);
             Sleep.StartDeepSleep();
             throw new Exception("Impossible exception");
+        }
+        public static object? LastOrDefault(this IEnumerable instance)
+        {
+            object? last = null;
+            foreach(object item in instance)
+            {
+                last = item;
+            }
+            return last;
         }
     }
 }

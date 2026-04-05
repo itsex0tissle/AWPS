@@ -22,7 +22,6 @@ using System.Diagnostics;
 using Iot.Device.DhcpServer;
 using nanoFramework.WebServer;
 using AWPS.IoT.WebControllers;
-using nanoFramework.Networking;
 using nanoFramework.Runtime.Native;
 using System.Net.NetworkInformation;
 
@@ -153,10 +152,6 @@ namespace AWPS.IoT
                 }
             };
         }
-        private static void TryReconnectToWifi()
-        {
-            WifiNetworkHelper.Reconnect(requiresDateTime: true);
-        }
         private static void EnsureUtcNowIsValid()
         {
             if(DateTime.UtcNow.Year > 2025)
@@ -165,6 +160,8 @@ namespace AWPS.IoT
                 return;
             }
             Debug.WriteLine("System time is not UTC");
+            Debug.WriteLine("Waiting for 10s before entering deep sleep");
+            Thread.Sleep(10000);
             Helper.EnterDeepSleep(TimeSpan.FromMinutes(5));
         }
         public static void Main()
@@ -186,9 +183,9 @@ namespace AWPS.IoT
                     Thread.Sleep(Timeout.Infinite);
                 }
                 Debug.WriteLine("Device mode: Normal");
-                TryReconnectToWifi();
                 EnsureUtcNowIsValid();
                 MeasuringWork.Start();
+                WateringWork.Start();
                 MqttWork.Start();
             }
             catch { }

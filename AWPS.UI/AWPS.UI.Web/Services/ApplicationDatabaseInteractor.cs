@@ -14,8 +14,16 @@ public sealed class ApplicationDatabaseInteractor(IDbContextFactory<ApplicationD
         {
             return database.MeasuringDataSet.AsNoTracking().AsEnumerable().Select(model =>
             {
-                return new MeasuringDataModel(DateTime.FromBinary(model.Timestamp).ToLocalTime(), model.Light, model.Moisture, model.Humidity, model.Temperature);
+                return new MeasuringDataModel(DateTime.FromBinary(model.Timestamp), model.Light, model.Moisture, model.Humidity, model.Temperature);
             }).ToArray();
+        }
+    }
+    public void ClearMeasuringData()
+    {
+        using (ApplicationDatabase database = DatabaseFactory.CreateDbContext())
+        {
+            database.MeasuringDataSet.RemoveRange(database.MeasuringDataSet);
+            database.SaveChanges();
         }
     }
     #endregion
