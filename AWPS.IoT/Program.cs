@@ -1,18 +1,3 @@
-/* Top-Level packages:
- * nanoFramework.System.Net;
- * nanoFramework.Runtime.Native;
- * nanoFramework.IoT.Device.DhcpServer;
- * nanoFramework.IoT.Device.Button;
- * nanoFramework.WebServer;
- * nanoFramework.System.Device.Wifi;
- * nanoFramework.System.Adc;
- * nanoFramework.IoT.Device.Dhtxx.Esp32;
- * nanoFramework.System.IO.FileSystem;
- * nanoFramework.M2Mqtt;
- * nanoFramework.ResourceManager;
- * nanoFramework.Hardware.Esp32;
- */
-
 using System;
 using System.Net;
 using AWPS.IoT.Works;

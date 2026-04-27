@@ -49,7 +49,10 @@ namespace AWPS.IoT
             if(result is not WifiConnectionStatus.Success)
             {
                 Debug.WriteLine($"Failed to connect to wifi network: {ssid}");
-                TryConnect(configuration.Ssid, configuration.Password);
+                if(ssid != configuration.Ssid || password != configuration.Password)
+                {
+                    TryConnect(configuration.Ssid, configuration.Password);
+                }
             }
             else
             {
