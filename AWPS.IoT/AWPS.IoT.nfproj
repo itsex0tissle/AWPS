@@ -27,6 +27,17 @@
     <Compile Include="BinaryRecords\TimestampBinaryRecord.cs" />
     <Compile Include="BinaryRecords\SensorsDataRecord.cs" />
     <Compile Include="Helper.cs" />
+    <Compile Include="MsgPack\Converters\WifiAvailableNetworkResponseConverter.cs" />
+    <Compile Include="MsgPack\Converters\WifiConnectionResultResponseConverter.cs" />
+    <Compile Include="MsgPack\Converters\WifiCredentialsRequestConverter.cs" />
+    <Compile Include="MsgPack\Converters\WifiStateResponseConverter.cs" />
+    <Compile Include="MsgPack\Models\WifiAvailableNetworkResponse.cs" />
+    <Compile Include="MsgPack\Models\WifiConnectionResultResponse.cs" />
+    <Compile Include="MsgPack\Models\WifiCredentialsRequest.cs" />
+    <Compile Include="MsgPack\Models\WifiStateResponse.cs" />
+    <Compile Include="WebControllers\RootWebController.cs" />
+    <Compile Include="WebControllers\WebController.cs" />
+    <Compile Include="WebControllers\WifiWebController.cs" />
     <Compile Include="Works\MeasuringWork.cs" />
     <Compile Include="MqttInteraction\MqttInteractor.cs" />
     <Compile Include="MqttInteraction\MqttResources.Designer.cs">
@@ -39,9 +50,6 @@
     <Compile Include="BinaryRecords\GetWifiStatusResponseRecord.cs" />
     <Compile Include="BinaryRecords\PostWifiRequestRecord.cs" />
     <Compile Include="BinaryRecords\PostWifiResponseRecord.cs" />
-    <Compile Include="WebControllers\ResponseHelper.cs" />
-    <Compile Include="WebControllers\RootWebController.cs" />
-    <Compile Include="WebControllers\Wireless80211WebController.cs" />
     <Compile Include="Wireless80211.cs" />
     <Compile Include="WirelessAP.cs" />
     <Compile Include="Works\MqttWork.cs" />
@@ -71,6 +79,9 @@
     </Reference>
     <Reference Include="nanoFramework.M2Mqtt.Core">
       <HintPath>..\packages\nanoFramework.M2Mqtt.5.1.212\lib\nanoFramework.M2Mqtt.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="nanoFramework.MessagePack">
+      <HintPath>..\packages\nanoFramework.MessagePack.1.0.42\lib\netnano1.0\nanoFramework.MessagePack.dll</HintPath>
     </Reference>
     <Reference Include="nanoFramework.ResourceManager">
       <HintPath>..\packages\nanoFramework.ResourceManager.1.2.32\lib\nanoFramework.ResourceManager.dll</HintPath>

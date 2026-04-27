@@ -8,15 +8,20 @@ namespace AWPS.IoT
 {
     public static class Wireless80211
     {
+        public static bool Connected
+        {
+            get => GetInterface().IPv4Address.StartsWith("0") is false;
+        }
+
         public static WifiAdapter GetAdapter()
         {
             return WifiAdapter.FindAllAdapters()[0];
         }
         public static NetworkInterface GetInterface()
         {
-            foreach(NetworkInterface network_interface in NetworkInterface.GetAllNetworkInterfaces())
+            foreach (NetworkInterface network_interface in NetworkInterface.GetAllNetworkInterfaces())
             {
-                if(network_interface.NetworkInterfaceType is NetworkInterfaceType.Wireless80211)
+                if (network_interface.NetworkInterfaceType is NetworkInterfaceType.Wireless80211)
                 {
                     return network_interface;
                 }
@@ -27,29 +32,49 @@ namespace AWPS.IoT
         {
             return Wireless80211Configuration.GetAllWireless80211Configurations()[GetInterface().SpecificConfigId];
         }
-
-        public static bool Connected
+        public static WifiAvailableNetwork[] GetAvailableNetworks()
         {
-            get => GetInterface().IPv4Address.StartsWith("0") is false;
-        }
+            WifiAdapter adapter = GetAdapter();
+            adapter.Disconnect();
 
+            bool scan_finished = false;
+            adapter.AvailableNetworksChanged += ContinueExecution;
+            adapter.ScanAsync();
+            while (scan_finished is false)
+            {
+                Thread.Sleep(200);
+            }
+
+            WifiAvailableNetwork[] available_networks = adapter.NetworkReport.AvailableNetworks;
+            Wireless80211Configuration configuration = GetConfiguration();
+            TryConnect(configuration.Ssid, configuration.Password);
+            return available_networks;
+
+            void ContinueExecution(WifiAdapter sender, object event_args)
+            {
+                scan_finished = true;
+                sender.AvailableNetworksChanged -= ContinueExecution;
+            }
+        }
         public static WifiConnectionStatus TryConnect(string ssid, string password)
         {
             WifiAdapter adapter = GetAdapter();
             adapter.Disconnect();
+
             bool status_got = false;
             WifiConnectionStatus result = default;
             adapter.AvailableNetworksChanged += ConnectToWifi;
             adapter.ScanAsync();
-            while(status_got is false)
+            while (status_got is false)
             {
                 Thread.Sleep(200);
             }
+
             Wireless80211Configuration configuration = GetConfiguration();
-            if(result is not WifiConnectionStatus.Success)
+            if (result is not WifiConnectionStatus.Success)
             {
                 Debug.WriteLine($"Failed to connect to wifi network: {ssid}");
-                if(ssid != configuration.Ssid || password != configuration.Password)
+                if (ssid != configuration.Ssid || password != configuration.Password)
                 {
                     TryConnect(configuration.Ssid, configuration.Password);
                 }
@@ -69,7 +94,7 @@ namespace AWPS.IoT
                 {
                     result = sender.Connect(ssid, WifiReconnectionKind.Automatic, password).ConnectionStatus;
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     result = WifiConnectionStatus.UnspecifiedFailure;
                     Debug.WriteLine($"Failed to connect to wifi network: SSID = {ssid}; Exception = {ex}");

@@ -5,8 +5,11 @@ using System.Threading;
 using Iot.Device.Button;
 using System.Diagnostics;
 using Iot.Device.DhcpServer;
+using AWPS.IoT.MsgPack.Models;
 using nanoFramework.WebServer;
 using AWPS.IoT.WebControllers;
+using nanoFramework.MessagePack;
+using AWPS.IoT.MsgPack.Converters;
 using nanoFramework.Runtime.Native;
 using System.Net.NetworkInformation;
 
@@ -50,6 +53,13 @@ namespace AWPS.IoT
             {
                 Debug.WriteLine("Wifi connected");
             }
+        }
+        private static void SetupMsgPack()
+        {
+            ConverterContext.Add(typeof(WifiStateResponse), new WifiStateResponseConverter());
+            ConverterContext.Add(typeof(WifiCredentialsRequest), new WifiCredentialsRequestConverter());
+            ConverterContext.Add(typeof(WifiConnectionResultResponse), new WifiConnectionResultResponseConverter());
+            ConverterContext.Add(typeof(WifiAvailableNetworkResponse), new WifiAvailableNetworkResponseConverter());
         }
         private static void SetupButton()
         {
@@ -116,7 +126,7 @@ namespace AWPS.IoT
                     WebServer ??= new WebServer(80, HttpProtocol.Http, IPAddress.Parse(WirelessAP.IP), new Type[]
                     {
                         typeof(RootWebController),
-                        typeof(Wireless80211WebController)
+                        typeof(WifiWebController)
                     });
                     if (WebServer.Start() is true)
                     {
@@ -158,6 +168,7 @@ namespace AWPS.IoT
             {
                 Debug.WriteLine("Start of program");
                 SetupLogs();
+                SetupMsgPack();
                 SetupButton();
                 StartDhcpServerIfWirelessAPEnabled();
                 EnableTimeoutForWirelessAP();

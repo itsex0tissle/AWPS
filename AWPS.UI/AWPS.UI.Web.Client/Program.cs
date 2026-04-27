@@ -1,6 +1,8 @@
 using ApexCharts;
+using ProGaudi.MsgPack.Light;
 using AWPS.UI.Shared.Services;
 using AWPS.UI.Web.Client.Services;
+using AWPS.UI.Shared.MsgPack.Converters;
 using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 
@@ -12,4 +14,13 @@ builder.Services.AddScoped(static HubConnection(IServiceProvider provider) =>
 });
 builder.Services.AddApexCharts();
 builder.Services.AddHttpClient();
+builder.Services.AddSingleton(provider =>
+{
+    MsgPackContext context = new();
+    context.RegisterConverter(new WifiStateResponseConverter());
+    context.RegisterConverter(new WifiCredentialsRequestConverter());
+    context.RegisterConverter(new WifiConnectionResultResponseConverter());
+    context.RegisterConverter(new WifiAvailableNetworkResponseConverter());
+    return context;
+});
 await builder.Build().RunAsync();

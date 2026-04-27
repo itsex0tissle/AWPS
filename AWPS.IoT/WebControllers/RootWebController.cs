@@ -4,15 +4,15 @@ using nanoFramework.WebServer;
 
 namespace AWPS.IoT.WebControllers
 {
-    public sealed class RootWebController
+    public static class RootWebController
     {
         [Route("")]
         [Method("GET")]
-        public void GetPing(WebServerEventArgs event_args)
+        public static void Ping(WebServerEventArgs event_args)
         {
-            Debug.WriteLine("GET request on path ''");
-            ResponseHelper.SendStatusCode(event_args.Context.Response, HttpStatusCode.OK);
-            Debug.WriteLine("GET response on path ''");
+            Debug.WriteLine("'GET' request on path '/'");
+            WebController.SendStatusCode(event_args.Context.Response, HttpStatusCode.OK);
+            Debug.WriteLine("'GET' response on path '/'");
         }
     }
 }

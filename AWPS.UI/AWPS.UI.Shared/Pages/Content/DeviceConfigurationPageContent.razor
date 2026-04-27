@@ -1,4 +1,5 @@
 ﻿@inject IHttpClientFactory HttpFactory
+@inject MsgPackContext MsgPackContext
 
 @if (base.RendererInfo.IsInteractive is false)
 {
@@ -182,16 +183,16 @@ else
                 {
                     <div class="mt-4 text-sm">
 
-                        @if (PostResult.Success)
+                        @if (PostResult.Connected)
                         {
                             <div class="rounded-lg border border-green-200 bg-green-50 p-3 text-green-700">
-                                @PostResult.Description
+                                @PostResult.Message
                             </div>
                         }
                         else
                         {
                             <div class="rounded-lg border border-red-200 bg-red-50 p-3 text-red-700">
-                                @PostResult.Description
+                                @PostResult.Message
                             </div>
                         }
 
@@ -211,8 +212,8 @@ else
     private const string GetWifiStatusUrl = "http://192.168.4.1/wifi";
     private const string PostWifiUrl = "http://192.168.4.1/wifi";
 
-    private GetWifiStatusResponseRecord? WifiStatus;
-    private PostWifiResponseRecord? PostResult;
+    private WifiStateResponse? WifiStatus;
+    private WifiConnectionResultResponse? PostResult;
 
     private string Ssid = "";
     private string Password = "";
@@ -274,7 +275,7 @@ else
 
             byte[] data = await client.GetByteArrayAsync(GetWifiStatusUrl);
 
-            WifiStatus = GetWifiStatusResponseRecord.Deserialize(data);
+            WifiStatus = MsgPackSerializer.Deserialize<WifiStateResponse>(data, MsgPackContext);
         }
         catch
         {
@@ -296,31 +297,31 @@ else
         {
             using HttpClient client = HttpFactory.CreateClient();
 
-            PostWifiRequestRecord request = new()
+            WifiCredentialsRequest request = new()
             {
                 SSID = Ssid,
                 Password = Password
             };
 
-            byte[] body = request.Serialize();
+            byte[] body = MsgPackSerializer.Serialize(request, MsgPackContext);
 
             using ByteArrayContent content = new(body);
 
             content.Headers.ContentType =
-                new("application/octet-stream");
+                new("application/x-msgpack");
 
             HttpResponseMessage response =
                 await client.PostAsync(PostWifiUrl, content);
 
             byte[] data = await response.Content.ReadAsByteArrayAsync();
 
-            PostResult = PostWifiResponseRecord.Deserialize(data);
+            PostResult = MsgPackSerializer.Deserialize<WifiConnectionResultResponse>(data, MsgPackContext);
 
-            if(PostResult.Success)
+            if (PostResult.Connected)
             {
-                WifiStatus = new GetWifiStatusResponseRecord
+                WifiStatus = new WifiStateResponse
                 {
-                    Connected = PostResult.Success,
+                    Connected = PostResult.Connected,
                     SSID = Ssid
                 };
             }
