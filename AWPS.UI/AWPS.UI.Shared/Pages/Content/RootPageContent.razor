@@ -9,29 +9,6 @@
         await HubConnection.StopAsync();
     }
 }
-
-<div class="p-6">
-    <div class="mb-6 flex items-center justify-between">
-        <h1 class="text-3xl font-bold text-gray-800">Sensor Measurements</h1>
-        <a href="/configuration" class="rounded-lg bg-blue-600 px-4 py-2 text-white shadow hover:bg-blue-700">Configure Device</a>
-    </div>
-    <div class="rounded-xl bg-white p-6 shadow">
-        <div class="mb-4">
-            <label class="mb-1 block text-sm font-medium text-gray-600">Select parameter</label>
-            <select @bind="SelectedMetric" class="w-64 rounded-lg border px-3 py-2">
-                <option value="Light">Light</option>
-                <option value="Moisture">Soil Moisture</option>
-                <option value="Humidity">Air Humidity</option>
-                <option value="Temperature">Temperature</option>
-            </select>
-            <button @onclick="ClearData" class="h-10 rounded-lg bg-red-600 px-4 text-white shadow hover:bg-red-700">Clear Data</button>
-        </div>
-        <ApexChart TItem="MeasuringDataModel" Options="ChartOptions" @ref="Chart">
-            <ApexPointSeries TItem="MeasuringDataModel" Items="Data" Name="@SelectedMetric" XValue="@(x => x.Timestamp)" YValue="GetYValue" />
-        </ApexChart>
-    </div>
-</div>
-
 @code
 {
     private MeasuringDataModel[] Data = [];
@@ -66,10 +43,10 @@
                 Type = XAxisType.Datetime
             }
         };
-        HubConnection.On("UpdateClient", async void() =>
+        HubConnection.On("UpdateClient", async void () =>
         {
             Data = DatabaseInteractor.GetMeasuringDataSet();
-            if(Chart is not null)
+            if (Chart is not null)
             {
                 await Chart.UpdateSeriesAsync();
             }
@@ -91,7 +68,7 @@
     }
     protected override async Task OnParametersSetAsync()
     {
-        if(Chart != null)
+        if (Chart != null)
         {
             await Chart.UpdateSeriesAsync();
         }
@@ -100,10 +77,34 @@
     {
         DatabaseInteractor.ClearMeasuringData();
         Data = [];
-        if(Chart is not null)
+        if (Chart is not null)
         {
             await Chart.UpdateSeriesAsync();
         }
         await InvokeAsync(StateHasChanged);
     }
 }
+
+<PageLayout>
+    <div class="p-6">
+        <div class="mb-6 flex items-center justify-between">
+            <h1 class="text-3xl font-bold text-gray-800">Sensor Measurements</h1>
+            <a href="/DeviceConfiguration" class="rounded-lg bg-blue-600 px-4 py-2 text-white shadow hover:bg-blue-700">Configure Device</a>
+        </div>
+        <div class="rounded-xl bg-white p-6 shadow">
+            <div class="mb-4">
+                <label class="mb-1 block text-sm font-medium text-gray-600">Select parameter</label>
+                <select @bind="SelectedMetric" class="w-64 rounded-lg border px-3 py-2">
+                    <option value="Light">Light</option>
+                    <option value="Moisture">Soil Moisture</option>
+                    <option value="Humidity">Air Humidity</option>
+                    <option value="Temperature">Temperature</option>
+                </select>
+                <button @onclick="ClearData" class="h-10 rounded-lg bg-red-600 px-4 text-white shadow hover:bg-red-700">Clear Data</button>
+            </div>
+            <ApexChart TItem="MeasuringDataModel" Options="ChartOptions" @ref="Chart">
+                <ApexPointSeries TItem="MeasuringDataModel" Items="Data" Name="@SelectedMetric" XValue="@(x => x.Timestamp)" YValue="GetYValue" />
+            </ApexChart>
+        </div>
+    </div>
+</PageLayout>

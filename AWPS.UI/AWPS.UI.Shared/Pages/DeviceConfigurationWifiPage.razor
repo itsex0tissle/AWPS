@@ -1,0 +1,10 @@
+@page "/DeviceConfiguration/Wifi"
+
+@if(base.RendererInfo.Name is not Renderer.WebView)
+{
+    <DeviceConfigurationWifiPageContent @rendermode=@RenderMode.InteractiveWebAssembly />
+}
+else
+{
+    <DeviceConfigurationWifiPageContent />
+}
