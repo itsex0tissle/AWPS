@@ -117,35 +117,48 @@ namespace AWPS.IoT
                 }
             }
         }
-        private static void SetupTooglingWebServerBasedOnAP()
+        private static void ToogleWebServerOnNetworkAPStationChanged()
         {
+            WebServer ??= new WebServer(80, HttpProtocol.Http, IPAddress.Parse(WirelessAP.IP), new Type[]
+            {
+                typeof(RootWebController),
+                typeof(WifiWebController)
+            });
             NetworkChange.NetworkAPStationChanged += delegate (int station_index, NetworkAPStationEventArgs event_args)
             {
-                if (event_args.IsConnected is true)
+                if(event_args.IsConnected is true)
                 {
-                    WebServer ??= new WebServer(80, HttpProtocol.Http, IPAddress.Parse(WirelessAP.IP), new Type[]
-                    {
-                        typeof(RootWebController),
-                        typeof(WifiWebController)
-                    });
-                    if (WebServer.Start() is true)
+                    if(WebServer.IsRunning is false && WebServer.Start() is true)
                     {
                         Debug.WriteLine($"WebServer started. Listening on: 'http://{WirelessAP.IP}:80'");
                     }
                     else
                     {
                         Debug.WriteLine("WebServer start failed");
+                        Power.RebootDevice();
                     }
                 }
                 else
                 {
-                    if (WebServer is not null && WebServer.IsRunning is true)
+                    if(WebServer is not null && WebServer.IsRunning is true)
                     {
                         WebServer.Stop();
                         Debug.WriteLine("WebServer stopped");
                     }
                 }
             };
+            if(WirelessAP.GetConfiguration().GetConnectedStations().Length > 0)
+            {
+                if(WebServer.IsRunning is false && WebServer.Start() is true)
+                {
+                    Debug.WriteLine($"WebServer started. Listening on: 'http://{WirelessAP.IP}:80'");
+                }
+                else
+                {
+                    Debug.WriteLine("WebServer start failed");
+                    Power.RebootDevice();
+                }
+            }
         }
         private static void EnsureUtcNowIsValid()
         {
@@ -172,7 +185,7 @@ namespace AWPS.IoT
                 SetupButton();
                 StartDhcpServerIfWirelessAPEnabled();
                 EnableTimeoutForWirelessAP();
-                SetupTooglingWebServerBasedOnAP();
+                ToogleWebServerOnNetworkAPStationChanged();
                 if(WirelessAP.Enabled is true)
                 {
                     Debug.WriteLine("Device mode: Configuration");
