@@ -1,4 +1,4 @@
-﻿namespace AWPS.UI.Shared;
+﻿namespace AWPS.UI.Shared.Helpers;
 
 public static class Renderer
 {

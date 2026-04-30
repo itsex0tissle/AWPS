@@ -1,8 +1,9 @@
 using ApexCharts;
+using AWPS.UI.Shared.MsgPack;
+using AWPS.UI.Shared.Helpers;
 using ProGaudi.MsgPack.Light;
 using AWPS.UI.Shared.Services;
 using AWPS.UI.Web.Client.Services;
-using AWPS.UI.Shared.MsgPack.Converters;
 using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 
@@ -21,6 +22,17 @@ builder.Services.AddSingleton(provider =>
     context.RegisterConverter(new WifiCredentialsRequestConverter());
     context.RegisterConverter(new WifiConnectionResultResponseConverter());
     context.RegisterConverter(new WifiAvailableNetworkResponseConverter());
+    context.RegisterConverter(new WifiAvailableNetworkResponseArrayConverter());
     return context;
 });
+builder.Services.AddKeyedScoped(HttpClientKey.Server, (provider, key) => new HttpClient()
+{
+    BaseAddress = new Uri(builder.HostEnvironment.BaseAddress)
+});
+builder.Services.AddKeyedScoped(HttpClientKey.Device, (provider, key) => new HttpClient()
+{
+    BaseAddress = new Uri("http://192.168.4.1:80")
+});
+builder.Services.AddScoped<IServerInteractor, ServerInteractor>();
+builder.Services.AddScoped<IDeviceInteractor, DeviceInteractor>();
 await builder.Build().RunAsync();

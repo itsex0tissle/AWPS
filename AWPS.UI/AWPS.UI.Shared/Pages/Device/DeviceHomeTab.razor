@@ -1,0 +1,21 @@
+﻿@inject NavigationManager NavigationManager
+@code
+{
+    private DeviceWifiNotConnectedModal WifiNotConnectedModalRef { get; set; } = null!; //Init by @ref tag-helper
+
+    private async Task BackToProfileHandler()
+    {
+        if(await WifiNotConnectedModalRef.SendPing() is true)
+        {
+            NavigationManager.NavigateTo("/");
+        }
+    }
+}
+
+<DeviceWifiNotConnectedModal @ref=@WifiNotConnectedModalRef />
+<div class="flex min-h-full flex-col items-center justify-center">
+    <p class="m-15 text-center text-6xl text-gray-600">Welcome to the device page</p>
+    <p class="m-3 text-center text-xl text-gray-600">Connect to the access point of your device to use other tabs.</p>
+    <p class="m-3 text-center text-xl text-gray-600">When you're done, reconnect to your Wi-Fi to return to your profile page.</p>
+    <LoadableButton Class="m-6" OnClick=@BackToProfileHandler>Back to profile page</LoadableButton>
+</div>

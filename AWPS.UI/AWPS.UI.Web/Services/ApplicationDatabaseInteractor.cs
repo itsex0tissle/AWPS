@@ -1,7 +1,7 @@
 ﻿using AWPS.IoT.Server.EFCore;
-using AWPS.UI.Shared.Services;
 using Microsoft.EntityFrameworkCore;
-using AWPS.UI.Shared.Services.Models;
+using AWPS.UI.Shared.Services;
+using AWPS.UI.Shared.Models;
 
 namespace AWPS.UI.Web.Services;
 

@@ -1,5 +1,5 @@
-﻿using AWPS.UI.Shared.Services;
-using AWPS.UI.Shared.Services.Models;
+﻿using AWPS.UI.Shared.Models;
+using AWPS.UI.Shared.Services;
 
 namespace AWPS.UI.Services;
 

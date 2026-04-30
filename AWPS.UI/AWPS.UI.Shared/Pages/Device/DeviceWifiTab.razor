@@ -1,0 +1,99 @@
+@inject IDeviceInteractor DeviceInteractor
+@code
+{
+    private DeviceNotConnectedModal ModalRef { get; set; } = null!; //Init by @ref tag-helper
+    private WifiAvailableNetworkResponse[] Networks { get; set; } = [];
+    private WifiStateResponse? WifiState { get; set; }
+    private int? SelectedItem { get; set; }
+    private bool IsLoadingStateFaulted { get; set; }
+    private bool IsLoadingNetworksFaulted { get; set; }
+
+    private async Task Clear()
+    {
+        IsLoadingStateFaulted = false;
+        IsLoadingNetworksFaulted = false;
+        await InvokeAsync(StateHasChanged);
+    }
+    private async Task GetWifiState()
+    {
+        await Clear();
+        try
+        {
+            if (await ModalRef.SendPing() is true)
+            {
+                WifiState = await DeviceInteractor.GetWifiState();
+            }
+        }
+        catch
+        {
+            IsLoadingStateFaulted = true;
+        }
+    }
+    private async Task GetAvailableNetworks()
+    {
+        await Clear();
+        try
+        {
+            if (await ModalRef.SendPing() is true)
+            {
+                Networks = await DeviceInteractor.GetAvailableNetworks();
+            }
+        }
+        catch
+        {
+            IsLoadingNetworksFaulted = true;
+        }
+    }
+    private async Task SelectNetwork(int item)
+    {
+        SelectedItem = (SelectedItem == item ? null : item);
+        await InvokeAsync(StateHasChanged);
+    }
+    private async Task ReloadWifiState()
+    {
+        await GetWifiState();
+        SelectedItem = null;
+    }
+}
+
+<DeviceNotConnectedModal @ref=@ModalRef />
+<div class="space-y-6 p-6 text-green-900">
+    <div class="rounded-2xl bg-green-100 p-4 shadow">
+        <div class="flex items-center justify-between">
+            <div>
+                <div class="text-lg font-semibold">Wi-Fi Status</div>
+                <div class="text-green-700">
+                    @if (WifiState is null)
+                    {
+                        <text>Not available yet. Please press refresh button</text>
+                    }
+                    else if (WifiState.SSID is "")
+                    {
+                        <text>No Wi-Fi</text>
+                    }
+                    else
+                    {
+                        <text>@(WifiState.Connected is true ? "Connected" : "Disconnected"): @(WifiState.SSID)</text>
+                    }
+                </div>
+            </div>
+            <ResultableButton OnClick=@GetWifiState IsFaulted=@IsLoadingStateFaulted>Refresh</ResultableButton>
+        </div>
+    </div>
+    <DeviceWifiCustomNetwork ModalRef=@ModalRef ReloadState=@ReloadWifiState />
+    <div class="space-y-3 rounded-2xl bg-green-50 p-4 shadow">
+        <div class="flex items-center justify-between">
+            <div class="text-lg font-semibold">Available Networks</div>
+            <ResultableButton OnClick=GetAvailableNetworks IsFaulted=@IsLoadingNetworksFaulted>Scan</ResultableButton>
+        </div>
+        @foreach ((int index, WifiAvailableNetworkResponse network) in Networks.Index())
+        {
+            <DeviceWifiNetworkItem Index=@index
+                                   Network=@network
+                                   OnSelect=@SelectNetwork
+                                   ReloadState=@ReloadWifiState
+                                   IsSelected=@(SelectedItem == index)
+                                   ModalRef=@ModalRef />
+        }
+    </div>
+</div>

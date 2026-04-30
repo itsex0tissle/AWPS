@@ -1,0 +1,15 @@
+@code
+{
+    [Parameter] public bool IsFaulted { get; set; }
+    [Parameter] public EventCallback OnClick { get; set; }
+
+    [Parameter] public string? Class { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    [Parameter(CaptureUnmatchedValues = true)] public Dictionary<string, object> AdditionalAttributes { get; set; } = new();
+}
+
+<LoadableButton OnClick=@OnClick
+                data-faulted=@IsFaulted
+                ChildContent=@ChildContent
+                @attributes=@AdditionalAttributes
+                Class="data-[faulted]:!bg-red-500 data-[faulted]:hover:!bg-red-600" />

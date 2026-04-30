@@ -1,5 +1,5 @@
-﻿<Router AppAssembly=@typeof(Layout.MainLayout).Assembly NotFoundPage=@typeof(Pages.NotFoundPage)>
+﻿<Router AppAssembly=@typeof(MainLayout).Assembly NotFoundPage=@typeof(NotFoundPage)>
     <Found Context="route_data">
-        <RouteView RouteData=@route_data DefaultLayout=@typeof(Layout.MainLayout) />
+        <RouteView RouteData=@route_data DefaultLayout=@typeof(MainLayout) />
     </Found>
 </Router>

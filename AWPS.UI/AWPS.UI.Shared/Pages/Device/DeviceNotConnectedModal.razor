@@ -1,0 +1,38 @@
+@inject IDeviceInteractor DeviceInteractor
+@code
+{
+    private bool IsOpen { get; set; }
+    private bool IsFaulted { get; set; }
+
+    public async Task<bool> SendPing()
+    {
+        try
+        {
+            IsFaulted = false;
+            if(await DeviceInteractor.Ping() is true)
+            {
+                IsOpen = false;
+                IsFaulted = false;
+                return true;
+            }
+            if(IsOpen is true)
+            {
+                IsFaulted = true;
+            }
+            IsOpen = true;
+            return false;
+        }
+        finally
+        {
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+}
+
+<DeviceModalDialog Title="Device is not connected"
+                   Message="Check the connection to the access point of the device and press retry button"
+                   ButtonText="Retry"
+                   OnButtonClick=@SendPing
+                   IsOpen=@IsOpen
+                   IsFaulted=@IsFaulted
+                   Class="!w-[700px]" />

@@ -1,11 +1,9 @@
 using ApexCharts;
 using AWPS.UI.Web;
 using AWPS.UI.Web.Services;
-using ProGaudi.MsgPack.Light;
 using AWPS.IoT.Server.EFCore;
 using AWPS.UI.Shared.Services;
 using Microsoft.EntityFrameworkCore;
-using AWPS.UI.Shared.MsgPack.Converters;
 using Microsoft.AspNetCore.SignalR.Client;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
@@ -21,15 +19,8 @@ builder.Services.AddScoped(static HubConnection(IServiceProvider provider) =>
 });
 builder.Services.AddApexCharts();
 builder.Services.AddHttpClient();
-builder.Services.AddSingleton(provider =>
-{
-    MsgPackContext context = new();
-    context.RegisterConverter(new WifiStateResponseConverter());
-    context.RegisterConverter(new WifiCredentialsRequestConverter());
-    context.RegisterConverter(new WifiConnectionResultResponseConverter());
-    context.RegisterConverter(new WifiAvailableNetworkResponseConverter());
-    return context;
-});
+builder.Services.AddScoped<IServerInteractor, ServerInteractor>();
+builder.Services.AddScoped<IDeviceInteractor, DeviceInteractor>();
 
 WebApplication app = builder.Build();
 if(app.Environment.IsDevelopment() is true)
@@ -49,4 +40,5 @@ app.MapRazorComponents<App>().AddInteractiveServerRenderMode().AddInteractiveWeb
     typeof(AWPS.UI.Shared._Imports).Assembly,
     typeof(AWPS.UI.Web.Client._Imports).Assembly
 ]);
+app.MapGet("/ping", () => Results.Ok());
 app.Run();

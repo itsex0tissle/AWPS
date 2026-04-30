@@ -1,0 +1,39 @@
+﻿@code
+{
+    private Type SelectedTab { get; set; } = typeof(DeviceHomeTab);
+
+    private void SaveTab(Type tab)
+    {
+        SelectedTab = tab;
+    }
+}
+
+<LoadScreen>   
+    <div class="flex min-h-screen w-full">
+        <aside class="w-72">
+            <div class="flex h-full flex-col border-r border-emerald-200 bg-emerald-950/95 text-white shadow-2xl shadow-emerald-950/20">
+                <div class="border-b border-emerald-800/70 px-4 py-4">
+                    <div class="text-sm font-semibold tracking-wide text-emerald-100">Device</div>
+                </div>
+                <nav class="flex-1 space-y-2 px-3 py-4">
+                    <DeviceNavSideButton OnSelect=@SaveTab
+                                         TTab="DeviceHomeTab"
+                                         Selected=@(SelectedTab == typeof(DeviceHomeTab))>Home</DeviceNavSideButton>
+                    <DeviceNavSideButton OnSelect=@SaveTab
+                                         TTab="DeviceWifiTab"
+                                         Selected=@(SelectedTab == typeof(DeviceWifiTab))>Wifi</DeviceNavSideButton>
+                </nav>
+            </div>
+        </aside>
+        <main class="flex-1 overflow-y-auto">
+            @if (SelectedTab == typeof(DeviceHomeTab))
+            {
+                <DeviceHomeTab />
+            }
+            else if (SelectedTab == typeof(DeviceWifiTab))
+            {
+                <DeviceWifiTab />
+            }
+        </main>
+    </div>
+</LoadScreen>

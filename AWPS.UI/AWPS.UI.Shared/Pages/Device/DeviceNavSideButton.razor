@@ -1,0 +1,18 @@
+﻿@typeparam TTab
+@code
+{
+    [Parameter] public bool Selected { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    [Parameter] public EventCallback<Type> OnSelect { get; set; }
+
+    private async Task ClickHandlerAsync()
+    {
+        await OnSelect.InvokeAsync(typeof(TTab));
+    }
+}
+
+<button data-selected=@Selected
+        @onclick=@ClickHandlerAsync
+        class="w-full cursor-pointer rounded-2xl px-3 py-3 text-start text-sm font-medium transition-all duration-200 hover:bg-emerald-900/70
+               hover:text-white data-[selected]:bg-emerald-500 data-[selected]:text-white data-[selected]:shadow-lg
+               data-[selected]:shadow-emerald-500/20">@ChildContent</button>

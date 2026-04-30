@@ -1,0 +1,38 @@
+@inject IServerInteractor ServerInteractor
+@code
+{
+    private bool IsOpen { get; set; }
+    private bool IsFaulted { get; set; }
+
+    public async Task<bool> SendPing()
+    {
+        try
+        {
+            IsFaulted = false;
+            if(await ServerInteractor.Ping() is true)
+            {
+                IsOpen = false;
+                IsFaulted = false;
+                return true;
+            }       
+            if(IsOpen is true)
+            {                
+                IsFaulted = true;
+            }
+            IsOpen = true;
+            return false;
+        }
+        finally
+        {
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+}
+
+<DeviceModalDialog Title="Wi-Fi is not connected"
+                   Message="Check the internet connection and press retry button"
+                   ButtonText="Retry"
+                   OnButtonClick=@SendPing
+                   IsOpen=@IsOpen
+                   IsFaulted=@IsFaulted
+                   Class="!w-[500px]" />

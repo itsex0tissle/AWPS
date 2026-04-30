@@ -1,0 +1,33 @@
+﻿@code
+{
+    [Parameter] public bool IsOpen { get; set; }
+    [Parameter] public string Title { get; set; } = "Modal Title";
+    [Parameter] public string Message { get; set; } = "Your message here";
+    [Parameter] public string ButtonText { get; set; } = "OK";
+    [Parameter] public bool IsFaulted { get; set; }
+    [Parameter] public EventCallback OnButtonClick { get; set; }
+    [Parameter] public string? Class { get; set; }
+    [Parameter(CaptureUnmatchedValues = true)] public Dictionary<string, object> AdditionalAttributes { get; set; } = [];
+}
+@code
+{
+    private void Close()
+    {
+        IsOpen = false;
+    }
+}
+
+@if(IsOpen is true)
+{
+    <div class="fixed inset-0 z-50 flex items-center justify-center">
+        <div class="bg-opacity-40 absolute inset-0 bg-black opacity-75" @onclick=@Close></div>
+        <div class="relative z-10 w-96 rounded-2xl bg-green-50 p-6 shadow-xl @Class" @attributes=@AdditionalAttributes>
+            <button class="absolute top-3 right-3 cursor-pointer text-green-700 hover:text-green-900" @onclick=@Close>✕</button>
+            <div class="flex flex-col items-center">
+                <h2 class="mb-4 text-xl font-semibold text-green-800">@Title</h2>
+                <p class="mb-6 text-green-700">@Message</p>
+                <ResultableButton OnClick=@OnButtonClick IsFaulted=@IsFaulted>@ButtonText</ResultableButton>
+            </div>
+        </div>
+    </div>
+}

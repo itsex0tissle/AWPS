@@ -106,5 +106,14 @@ namespace AWPS.IoT
                 }
             }
         }
+        public static void SaveCredentials(string ssid, string password)
+        {
+            GetAdapter().Disconnect();
+            Wireless80211Configuration configuration = GetConfiguration();
+            configuration.Ssid = ssid;
+            configuration.Password = password;
+            configuration.SaveConfiguration();
+            Debug.WriteLine($"New wifi saved: {ssid}");
+        }
     }
 }

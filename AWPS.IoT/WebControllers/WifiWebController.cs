@@ -91,5 +91,40 @@ namespace AWPS.IoT.WebControllers
             WebController.SendStatusCode(event_args.Context.Response, HttpStatusCode.OK);
             Debug.WriteLine("'OPTIONS' response on path '/wifi'");
         }
+
+        [Route("wifi/save")]
+        [Method("POST")]
+        public static void SaveWifi(WebServerEventArgs event_args)
+        {
+            Debug.WriteLine("'POST' request on path '/wifi/save'");
+            try
+            {
+                if (MessagePackSerializer.Deserialize(typeof(WifiCredentialsRequest), event_args.Context.Request.ReadBody()) is not WifiCredentialsRequest request)
+                {
+                    WebController.SendStatusCode(event_args.Context.Response, HttpStatusCode.BadRequest);
+                    return;
+                }
+                Wireless80211.SaveCredentials(request.SSID, request.Password);
+                WebController.SendStatusCode(event_args.Context.Response, HttpStatusCode.OK);
+            }
+            catch(Exception exc)
+            {
+                Debug.WriteLine($"'{nameof(SaveWifi)}' action failed. Exception: {exc}");
+                WebController.SendStatusCode(event_args.Context.Response, HttpStatusCode.BadRequest);
+            }
+            finally
+            {
+                Debug.WriteLine("'POST' response on path '/wifi/save'");
+            }
+        }
+
+        [Route("wifi/save")]
+        [Method("OPTIONS")]
+        public static void SaveWifiHeaders(WebServerEventArgs event_args)
+        {
+            Debug.WriteLine("'OPTIONS' request on path '/wifi/save'");
+            WebController.SendStatusCode(event_args.Context.Response, HttpStatusCode.OK);
+            Debug.WriteLine("'OPTIONS' response on path '/wifi/save'");
+        }
     }
 }
