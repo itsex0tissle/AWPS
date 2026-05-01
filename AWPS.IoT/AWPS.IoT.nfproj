@@ -19,26 +19,23 @@
   </PropertyGroup>
   <Import Project="$(NanoFrameworkProjectSystemPath)NFProjectSystem.props" Condition="Exists('$(NanoFrameworkProjectSystemPath)NFProjectSystem.props')" />
   <ItemGroup>
-    <Compile Include="BinaryFiles\BinaryFile.cs" />
-    <Compile Include="BinaryFiles\RecordsFile.cs" />
-    <Compile Include="BinaryFiles\MainDataFile.cs" />
-    <Compile Include="BinaryRecords\BinaryRecord.cs" />
-    <Compile Include="BinaryRecords\TimestampMessageRecord.cs" />
-    <Compile Include="BinaryRecords\TimestampBinaryRecord.cs" />
-    <Compile Include="BinaryRecords\SensorsDataRecord.cs" />
-    <Compile Include="Helper.cs" />
-    <Compile Include="MsgPack\Converters\WifiAvailableNetworkResponseConverter.cs" />
-    <Compile Include="MsgPack\Converters\WifiConnectionResultResponseConverter.cs" />
-    <Compile Include="MsgPack\Converters\WifiCredentialsRequestConverter.cs" />
-    <Compile Include="MsgPack\Converters\WifiStateResponseConverter.cs" />
-    <Compile Include="MsgPack\Models\WifiAvailableNetworkResponse.cs" />
-    <Compile Include="MsgPack\Models\WifiConnectionResultResponse.cs" />
-    <Compile Include="MsgPack\Models\WifiCredentialsRequest.cs" />
-    <Compile Include="MsgPack\Models\WifiStateResponse.cs" />
+    <Compile Include="Files\SensorsDataFile.cs" />
+    <Compile Include="Helpers\Helper.cs" />
+    <Compile Include="MsgPack\Converters\WifiAvailableNetworkRecordConverter.cs" />
+    <Compile Include="MsgPack\Converters\WifiConnectionResultRecordConverter.cs" />
+    <Compile Include="MsgPack\Converters\WifiCredentialsRecordConverter.cs" />
+    <Compile Include="MsgPack\Converters\SensorsDataRecordConverter.cs" />
+    <Compile Include="MsgPack\Converters\WifiStateRecordConverter.cs" />
+    <Compile Include="MsgPack\Models\SensorsDataRecord.cs" />
+    <Compile Include="MsgPack\Models\WifiAvailableNetworkRecord.cs" />
+    <Compile Include="MsgPack\Models\WifiConnectionResultRecord.cs" />
+    <Compile Include="MsgPack\Models\WifiCredentialsRecord.cs" />
+    <Compile Include="MsgPack\Models\WifiStateRecord.cs" />
+    <Compile Include="MsgPack\MsgPackContextConfigurator.cs" />
     <Compile Include="WebControllers\RootWebController.cs" />
     <Compile Include="WebControllers\WebController.cs" />
     <Compile Include="WebControllers\WifiWebController.cs" />
-    <Compile Include="Works\MeasuringWork.cs" />
+    <Compile Include="Works\GatherAndSaveSensorsDataWork.cs" />
     <Compile Include="MqttInteraction\MqttInteractor.cs" />
     <Compile Include="MqttInteraction\MqttResources.Designer.cs">
       <DesignTime>True</DesignTime>
@@ -47,12 +44,10 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="BinaryRecords\GetWifiStatusResponseRecord.cs" />
-    <Compile Include="BinaryRecords\PostWifiRequestRecord.cs" />
-    <Compile Include="BinaryRecords\PostWifiResponseRecord.cs" />
-    <Compile Include="Wireless80211.cs" />
-    <Compile Include="WirelessAP.cs" />
-    <Compile Include="Works\MqttWork.cs" />
+    <Compile Include="Services\Wireless80211.cs" />
+    <Compile Include="Services\WirelessAP.cs" />
+    <Compile Include="Works\SendSensorsDataToMqttWork.cs" />
+    <Compile Include="Works\PrepareDeviceWork.cs" />
     <Compile Include="Works\WateringWork.cs" />
   </ItemGroup>
   <ItemGroup>

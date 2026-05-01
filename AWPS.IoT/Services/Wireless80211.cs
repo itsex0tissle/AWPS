@@ -4,7 +4,7 @@ using System.Device.Wifi;
 using System.Diagnostics;
 using System.Net.NetworkInformation;
 
-namespace AWPS.IoT
+namespace AWPS.IoT.Services
 {
     public static class Wireless80211
     {

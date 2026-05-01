@@ -3,7 +3,7 @@ using System.Diagnostics;
 using nanoFramework.Runtime.Native;
 using System.Net.NetworkInformation;
 
-namespace AWPS.IoT
+namespace AWPS.IoT.Services
 {
     public static class WirelessAP
     {
@@ -11,11 +11,16 @@ namespace AWPS.IoT
         public const string Mask = "255.255.255.0";
         public const string SSID = "AutoWateringDevice";
 
+        public static bool Enabled
+        {
+            get => (GetConfiguration().Options & WirelessAPConfiguration.ConfigurationOptions.Enable) != 0;
+        }
+
         public static NetworkInterface GetInterface()
         {
-            foreach(NetworkInterface network_interface in NetworkInterface.GetAllNetworkInterfaces())
+            foreach (NetworkInterface network_interface in NetworkInterface.GetAllNetworkInterfaces())
             {
-                if(network_interface.NetworkInterfaceType is NetworkInterfaceType.WirelessAP)
+                if (network_interface.NetworkInterfaceType is NetworkInterfaceType.WirelessAP)
                 {
                     return network_interface;
                 }
@@ -26,12 +31,6 @@ namespace AWPS.IoT
         {
             return WirelessAPConfiguration.GetAllWirelessAPConfigurations()[GetInterface().SpecificConfigId];
         }
-        
-        public static bool Enabled
-        {
-            get => (GetConfiguration().Options & WirelessAPConfiguration.ConfigurationOptions.Enable) != 0;
-        }
-
         public static void Enable()
         {
             if(Enabled is true)

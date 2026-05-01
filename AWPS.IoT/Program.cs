@@ -1,177 +1,12 @@
 using System;
-using System.Net;
 using AWPS.IoT.Works;
 using System.Threading;
-using Iot.Device.Button;
 using System.Diagnostics;
-using Iot.Device.DhcpServer;
-using AWPS.IoT.MsgPack.Models;
-using nanoFramework.WebServer;
-using AWPS.IoT.WebControllers;
-using nanoFramework.MessagePack;
-using AWPS.IoT.MsgPack.Converters;
-using nanoFramework.Runtime.Native;
-using System.Net.NetworkInformation;
 
 namespace AWPS.IoT
 {
     public static class Program
-    {
-        private static GpioButton? Button { get; set; }
-        private static WebServer? WebServer { get; set; }
-        private static Timer? WirelessAPTimer { get; set; }
-
-        [Conditional("DEBUG")] private static void SetupLogs()
-        {
-            Power.OnRebootEvent += delegate ()
-            {
-                Debug.WriteLine("Rebooting...");
-            };
-            NetworkChange.NetworkAddressChanged += delegate (object sender, EventArgs event_args)
-            {
-                if (Wireless80211.Connected is true)
-                {
-                    Debug.WriteLine("Wifi connected");
-                }
-                else
-                {
-                    Debug.WriteLine("Wifi disconnected");
-                }
-            };
-            NetworkChange.NetworkAPStationChanged += delegate (int station_index, NetworkAPStationEventArgs event_args)
-            {
-                if (event_args.IsConnected is true)
-                {
-                    Debug.WriteLine("External device connected to AP");
-                }
-                else
-                {
-                    Debug.WriteLine("External device disconnected from AP");
-                }
-            };
-            if (Wireless80211.Connected is true)
-            {
-                Debug.WriteLine("Wifi connected");
-            }
-        }
-        private static void SetupMsgPack()
-        {
-            ConverterContext.Add(typeof(WifiStateResponse), new WifiStateResponseConverter());
-            ConverterContext.Add(typeof(WifiCredentialsRequest), new WifiCredentialsRequestConverter());
-            ConverterContext.Add(typeof(WifiConnectionResultResponse), new WifiConnectionResultResponseConverter());
-            ConverterContext.Add(typeof(WifiAvailableNetworkResponse), new WifiAvailableNetworkResponseConverter());
-        }
-        private static void SetupButton()
-        {
-            Button = new GpioButton(21);
-            Button.Press += static delegate (object sender, EventArgs event_args)
-            {
-                if (WirelessAP.Enabled is false)
-                {
-                    WirelessAP.Enable();
-                }
-                else
-                {
-                    WirelessAP.Disable();
-                }
-            };
-            Debug.Write("Button enabled");
-        }
-        private static void StartDhcpServerIfWirelessAPEnabled()
-        {
-            if (WirelessAP.Enabled is true)
-            {
-                if (new DhcpServer().Start(IPAddress.Parse(WirelessAP.IP), IPAddress.Parse(WirelessAP.Mask)) is false)
-                {
-                    Debug.WriteLine("DHCP-server start failed");
-                    Power.RebootDevice();
-                }
-                Debug.WriteLine("DHCP-server started");
-            }
-        }
-        private static void EnableTimeoutForWirelessAP()
-        {
-            if (WirelessAP.Enabled is true)
-            {
-                WirelessAPTimer = new Timer(DisableWirelessAP, null, 60000, Timeout.Infinite);
-                NetworkChange.NetworkAPStationChanged += delegate (int station_index, NetworkAPStationEventArgs event_args)
-                {
-                    if (event_args.IsConnected is true)
-                    {
-                        WirelessAPTimer?.Dispose();
-                        Debug.WriteLine("WirelessAP timeout disabled");
-                    }
-                    else
-                    {
-                        Debug.WriteLine("WirelessAP timeout enabled");
-                        WirelessAPTimer?.Dispose();
-                        WirelessAPTimer = new Timer(DisableWirelessAP, null, 60000, Timeout.Infinite);
-                    }
-                };
-                Debug.WriteLine("WirelessAP timeout enabled");
-
-                static void DisableWirelessAP(object? state)
-                {
-                    Debug.WriteLine("WirelessAP timeout");
-                    WirelessAP.Disable();
-                }
-            }
-        }
-        private static void ToogleWebServerOnNetworkAPStationChanged()
-        {
-            WebServer ??= new WebServer(80, HttpProtocol.Http, IPAddress.Parse(WirelessAP.IP), new Type[]
-            {
-                typeof(RootWebController),
-                typeof(WifiWebController)
-            });
-            NetworkChange.NetworkAPStationChanged += delegate (int station_index, NetworkAPStationEventArgs event_args)
-            {
-                if(event_args.IsConnected is true)
-                {
-                    if(WebServer.IsRunning is false && WebServer.Start() is true)
-                    {
-                        Debug.WriteLine($"WebServer started. Listening on: 'http://{WirelessAP.IP}:80'");
-                    }
-                    else
-                    {
-                        Debug.WriteLine("WebServer start failed");
-                        Power.RebootDevice();
-                    }
-                }
-                else
-                {
-                    if(WebServer is not null && WebServer.IsRunning is true)
-                    {
-                        WebServer.Stop();
-                        Debug.WriteLine("WebServer stopped");
-                    }
-                }
-            };
-            if(WirelessAP.GetConfiguration().GetConnectedStations().Length > 0)
-            {
-                if(WebServer.IsRunning is false && WebServer.Start() is true)
-                {
-                    Debug.WriteLine($"WebServer started. Listening on: 'http://{WirelessAP.IP}:80'");
-                }
-                else
-                {
-                    Debug.WriteLine("WebServer start failed");
-                    Power.RebootDevice();
-                }
-            }
-        }
-        private static void EnsureUtcNowIsValid()
-        {
-            if(DateTime.UtcNow.Year > 2025)
-            {
-                Debug.WriteLine("System time is UTC");
-                return;
-            }
-            Debug.WriteLine("System time is not UTC");
-            Debug.WriteLine("Waiting for 10s before entering deep sleep");
-            Thread.Sleep(10000);
-            Helper.EnterDeepSleep(TimeSpan.FromMinutes(5));
-        }
+    {   
         public static void Main()
         {
 #if DEBUG
@@ -179,25 +14,16 @@ namespace AWPS.IoT
 #endif
             try
             {
-                Debug.WriteLine("Start of program");
-                SetupLogs();
-                SetupMsgPack();
-                SetupButton();
-                StartDhcpServerIfWirelessAPEnabled();
-                EnableTimeoutForWirelessAP();
-                ToogleWebServerOnNetworkAPStationChanged();
-                if(WirelessAP.Enabled is true)
-                {
-                    Debug.WriteLine("Device mode: Configuration");
-                    Thread.Sleep(Timeout.Infinite);
-                }
-                Debug.WriteLine("Device mode: Normal");
-                EnsureUtcNowIsValid();
-                MeasuringWork.Start();
+                Debug.WriteLine("Program started");
+                PrepareDeviceWork.Start();
+                GatherAndSaveSensorsDataWork.Start();
                 WateringWork.Start();
-                MqttWork.Start();
+                SendSensorsDataToMqttWork.Start();
             }
-            catch { }
+            catch(Exception exc)
+            {
+                Debug.WriteLine($"Program failed: {exc}");
+            }
             Helper.EnterDeepSleep(TimeSpan.FromSeconds(30));
         }
     }

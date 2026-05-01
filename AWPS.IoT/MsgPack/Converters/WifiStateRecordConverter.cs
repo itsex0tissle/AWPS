@@ -6,22 +6,24 @@ using nanoFramework.MessagePack.Converters;
 
 namespace AWPS.IoT.MsgPack.Converters
 {
-    public sealed class WifiCredentialsRequestConverter : IConverter
+    public sealed class WifiStateRecordConverter : IConverter
     {
         #region Static
-        private static void InternalWrite(WifiCredentialsRequest obj, IMessagePackWriter writer)
+        private static void InternalWrite(WifiStateRecord obj, IMessagePackWriter writer)
         {
             IConverter str_converter = ConverterContext.GetConverter(typeof(string));
+            IConverter bool_converter = ConverterContext.GetConverter(typeof(bool));
             str_converter.Write(obj.SSID, writer);
-            str_converter.Write(obj.Password, writer);
+            bool_converter.Write(obj.Connected, writer);
         }
-        private static WifiCredentialsRequest InternalRead(IMessagePackReader reader)
+        private static WifiStateRecord InternalRead(IMessagePackReader reader)
         {
             IConverter str_converter = ConverterContext.GetConverter(typeof(string));
-            return new WifiCredentialsRequest()
+            IConverter bool_converter = ConverterContext.GetConverter(typeof(bool));
+            return new WifiStateRecord()
             {
                 SSID = (string)str_converter.Read(reader)!,
-                Password = (string)str_converter.Read(reader)!
+                Connected = (bool)bool_converter.Read(reader)!
             };
         }
         #endregion
@@ -29,11 +31,11 @@ namespace AWPS.IoT.MsgPack.Converters
         #region IConverter
         public void Write(object? obj, [NotNull] IMessagePackWriter writer)
         {
-            WifiCredentialsRequestConverter.InternalWrite((WifiCredentialsRequest)obj!, writer);
+            WifiStateRecordConverter.InternalWrite((WifiStateRecord)obj!, writer);
         }
         public object? Read([NotNull] IMessagePackReader reader)
         {
-            return WifiCredentialsRequestConverter.InternalRead(reader);
+            return WifiStateRecordConverter.InternalRead(reader);
         }
         #endregion
     }

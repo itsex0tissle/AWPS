@@ -1,8 +1,9 @@
-﻿using System.Threading;
+﻿using System;
+using AWPS.IoT.Files;
+using System.Threading;
 using System.Device.Gpio;
 using System.Diagnostics;
-using AWPS.IoT.BinaryFiles;
-using AWPS.IoT.BinaryRecords;
+using AWPS.IoT.MsgPack.Models;
 
 namespace AWPS.IoT.Works
 {
@@ -16,12 +17,13 @@ namespace AWPS.IoT.Works
         {
             try
             {
-                Debug.WriteLine("Start watering work");
-                if(MainDataFile.Instance.GetRecords().LastOrDefault() is not SensorsDataRecord record)
+                Debug.WriteLine("WateringWork started");
+                if(SensorsDataFile.Count is 0)
                 {
-                    Debug.WriteLine("No sensors data got. Can`t continue watering");
+                    Debug.WriteLine("No sensors data available. Can`t continue watering");
                     return;
                 }
+                SensorsDataRecord record = SensorsDataFile.Get(SensorsDataFile.Count - 1);
                 double dryness = DrynessIndex(record);
                 Debug.WriteLine($"Dryness: {dryness}");
                 if(dryness >= 50.0)
@@ -37,9 +39,12 @@ namespace AWPS.IoT.Works
                 {
                     Debug.WriteLine("Dryness too low to continue work");
                 }
-                Debug.WriteLine("Watering work finished");
+                Debug.WriteLine("WateringWork finished");
             }
-            catch { }
+            catch(Exception exc)
+            {
+                Debug.WriteLine($"WateringWork failed: {exc}");
+            }
         }
     }
 }

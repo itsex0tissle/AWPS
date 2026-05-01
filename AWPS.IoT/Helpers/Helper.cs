@@ -10,11 +10,11 @@ namespace AWPS.IoT
     {
         public static bool Retry(Action action, int retry = 5)
         {
-            for(; retry > 0; retry--)
+            for(int count = 1; count <= retry; retry++)
             {
                 try
                 {
-                    Debug.WriteLine($"Try count left: {retry}");
+                    Debug.WriteLine($"[Attempt: {count}]");
                     action();
                     return true;
                 }

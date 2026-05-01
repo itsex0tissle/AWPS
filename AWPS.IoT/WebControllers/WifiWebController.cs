@@ -6,6 +6,7 @@ using System.Diagnostics;
 using AWPS.IoT.MsgPack.Models;
 using nanoFramework.WebServer;
 using nanoFramework.MessagePack;
+using AWPS.IoT.Services;
 
 namespace AWPS.IoT.WebControllers
 {
@@ -16,7 +17,7 @@ namespace AWPS.IoT.WebControllers
         public static void GetWifiState(WebServerEventArgs event_args)
         {
             Debug.WriteLine("'GET' request on path '/wifi'");
-            WebController.SendObject(event_args.Context.Response, new WifiStateResponse()
+            WebController.SendObject(event_args.Context.Response, new WifiStateRecord()
             {
                 SSID = Wireless80211.GetConfiguration().Ssid,
                 Connected = Wireless80211.Connected
@@ -32,7 +33,7 @@ namespace AWPS.IoT.WebControllers
             ArrayList list = new();
             foreach(WifiAvailableNetwork network in Wireless80211.GetAvailableNetworks())
             {
-                WifiAvailableNetworkResponse response = new()
+                WifiAvailableNetworkRecord response = new()
                 {
                     SSID = network.Ssid,
                     SignalBars = network.SignalBars
@@ -50,13 +51,13 @@ namespace AWPS.IoT.WebControllers
             Debug.WriteLine("'POST' request on path '/wifi'");
             try
             {
-                if(MessagePackSerializer.Deserialize(typeof(WifiCredentialsRequest), event_args.Context.Request.ReadBody()) is not WifiCredentialsRequest request)
+                if(MessagePackSerializer.Deserialize(typeof(WifiCredentialsRecord), event_args.Context.Request.ReadBody()) is not WifiCredentialsRecord request)
                 {
                     WebController.SendStatusCode(event_args.Context.Response, HttpStatusCode.BadRequest);
                     return;
                 }
                 WifiConnectionStatus status = Wireless80211.TryConnect(request.SSID, request.Password);
-                WifiConnectionResultResponse response = new()
+                WifiConnectionResultRecord response = new()
                 {
                     Connected = status is WifiConnectionStatus.Success,
                     Message = status switch
@@ -99,7 +100,7 @@ namespace AWPS.IoT.WebControllers
             Debug.WriteLine("'POST' request on path '/wifi/save'");
             try
             {
-                if (MessagePackSerializer.Deserialize(typeof(WifiCredentialsRequest), event_args.Context.Request.ReadBody()) is not WifiCredentialsRequest request)
+                if (MessagePackSerializer.Deserialize(typeof(WifiCredentialsRecord), event_args.Context.Request.ReadBody()) is not WifiCredentialsRecord request)
                 {
                     WebController.SendStatusCode(event_args.Context.Response, HttpStatusCode.BadRequest);
                     return;

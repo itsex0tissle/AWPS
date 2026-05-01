@@ -1,8 +1,8 @@
 ﻿namespace AWPS.IoT.MsgPack.Models
 {
-    public sealed class WifiAvailableNetworkResponse
+    public sealed class WifiStateRecord
     {
         public string SSID { get; set; } = "";
-        public byte SignalBars { get; set; }
+        public bool Connected { get; set; }
     }
 }
