@@ -363,6 +363,4 @@ MigrationBackup/
 FodyWeavers.xsd
 /AWPS.IoT/MqttInteraction/ServerCertificate.crt
 /AWPS.IoT/MqttInteraction/MqttResources.resx
-/AWPS.IoT.Server/MqttInteraction/ServerCertificate.crt
-/AWPS.IoT.Server/MqttInteraction/MqttResources.resx
-/AWPS.IoT.Server/MqttInteraction/MqttResources.Designer.cs
+/AWPS.IoT.Server/Resources
