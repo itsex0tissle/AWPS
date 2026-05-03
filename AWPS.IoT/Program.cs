@@ -1,7 +1,7 @@
 using System;
 using AWPS.IoT.Works;
 using System.Threading;
-using System.Diagnostics;
+using AWPS.IoT.Services;
 
 namespace AWPS.IoT
 {
@@ -9,12 +9,12 @@ namespace AWPS.IoT
     {   
         public static void Main()
         {
-#if DEBUG
-            Thread.Sleep(10000); //Allows us to connect external serial port reader
-#endif
+            Logger.LogInfo($"{nameof(Program)}.{nameof(Main)} started");
             try
             {
-                Debug.WriteLine("Program started");
+#if DEBUG
+                Thread.Sleep(10000); //Allows us to connect external serial port reader
+#endif
                 PrepareDeviceWork.Start();
                 GatherAndSaveSensorsDataWork.Start();
                 WateringWork.Start();
@@ -22,9 +22,13 @@ namespace AWPS.IoT
             }
             catch(Exception exc)
             {
-                Debug.WriteLine($"Program failed: {exc}");
+                Logger.LogError(exc.ToString());
             }
-            Helper.EnterDeepSleep(TimeSpan.FromSeconds(30));
+            finally
+            {
+                Helper.EnterDeepSleep(TimeSpan.FromSeconds(30));
+            }
+            Logger.LogInfo($"{nameof(Program)}.{nameof(Main)} finished");
         }
     }
 }

@@ -19,19 +19,20 @@
   </PropertyGroup>
   <Import Project="$(NanoFrameworkProjectSystemPath)NFProjectSystem.props" Condition="Exists('$(NanoFrameworkProjectSystemPath)NFProjectSystem.props')" />
   <ItemGroup>
-    <Compile Include="Files\SensorsDataFile.cs" />
+    <Compile Include="Files\AccountFile.cs" />
+    <Compile Include="Files\TelemetryFile.cs" />
+    <Compile Include="Helpers\DateTimeHelper.cs" />
     <Compile Include="Helpers\Helper.cs" />
-    <Compile Include="MsgPack\Converters\WifiAvailableNetworkRecordConverter.cs" />
-    <Compile Include="MsgPack\Converters\WifiConnectionResultRecordConverter.cs" />
-    <Compile Include="MsgPack\Converters\WifiCredentialsRecordConverter.cs" />
-    <Compile Include="MsgPack\Converters\SensorsDataRecordConverter.cs" />
-    <Compile Include="MsgPack\Converters\WifiStateRecordConverter.cs" />
-    <Compile Include="MsgPack\Models\SensorsDataRecord.cs" />
-    <Compile Include="MsgPack\Models\WifiAvailableNetworkRecord.cs" />
-    <Compile Include="MsgPack\Models\WifiConnectionResultRecord.cs" />
-    <Compile Include="MsgPack\Models\WifiCredentialsRecord.cs" />
-    <Compile Include="MsgPack\Models\WifiStateRecord.cs" />
+    <Compile Include="Models\AccountRecord.cs" />
+    <Compile Include="MsgPack\Converters\TelemetryConverter.cs" />
+    <Compile Include="MsgPack\Models\TelemetryRecord.cs" />
+    <Compile Include="Models\WifiAvailableNetworkRecord.cs" />
+    <Compile Include="Models\WifiConnectionResultRecord.cs" />
+    <Compile Include="Models\WifiCredentialsRecord.cs" />
+    <Compile Include="Models\WifiStateRecord.cs" />
     <Compile Include="MsgPack\MsgPackContextConfigurator.cs" />
+    <Compile Include="Services\Logger.cs" />
+    <Compile Include="WebControllers\AccountWebController.cs" />
     <Compile Include="WebControllers\RootWebController.cs" />
     <Compile Include="WebControllers\WebController.cs" />
     <Compile Include="WebControllers\WifiWebController.cs" />
@@ -63,17 +64,23 @@
     <Reference Include="mscorlib">
       <HintPath>..\packages\nanoFramework.CoreLibrary.1.17.11\lib\mscorlib.dll</HintPath>
     </Reference>
+    <Reference Include="nanoFramework.Azure.Devices.Client">
+      <HintPath>..\packages\nanoFramework.Azure.Devices.Client.1.2.111\lib\nanoFramework.Azure.Devices.Client.dll</HintPath>
+    </Reference>
     <Reference Include="nanoFramework.Hardware.Esp32">
       <HintPath>..\packages\nanoFramework.Hardware.Esp32.1.6.37\lib\nanoFramework.Hardware.Esp32.dll</HintPath>
     </Reference>
     <Reference Include="nanoFramework.Hardware.Esp32.Rmt">
       <HintPath>..\packages\nanoFramework.Hardware.Esp32.Rmt.2.0.35\lib\nanoFramework.Hardware.Esp32.Rmt.dll</HintPath>
     </Reference>
+    <Reference Include="nanoFramework.Json">
+      <HintPath>..\packages\nanoFramework.Json.2.2.210\lib\nanoFramework.Json.dll</HintPath>
+    </Reference>
     <Reference Include="nanoFramework.M2Mqtt">
       <HintPath>..\packages\nanoFramework.M2Mqtt.5.1.212\lib\nanoFramework.M2Mqtt.dll</HintPath>
     </Reference>
     <Reference Include="nanoFramework.M2Mqtt.Core">
-      <HintPath>..\packages\nanoFramework.M2Mqtt.5.1.212\lib\nanoFramework.M2Mqtt.Core.dll</HintPath>
+      <HintPath>..\packages\nanoFramework.M2Mqtt.Core.5.1.212\lib\nanoFramework.M2Mqtt.Core.dll</HintPath>
     </Reference>
     <Reference Include="nanoFramework.MessagePack">
       <HintPath>..\packages\nanoFramework.MessagePack.1.0.42\lib\netnano1.0\nanoFramework.MessagePack.dll</HintPath>
@@ -89,6 +96,9 @@
     </Reference>
     <Reference Include="nanoFramework.System.Collections">
       <HintPath>..\packages\nanoFramework.System.Collections.1.5.67\lib\nanoFramework.System.Collections.dll</HintPath>
+    </Reference>
+    <Reference Include="nanoFramework.System.Security.Cryptography">
+      <HintPath>..\packages\nanoFramework.System.Security.Cryptography.1.0.43\lib\nanoFramework.System.Security.Cryptography.dll</HintPath>
     </Reference>
     <Reference Include="nanoFramework.System.Text">
       <HintPath>..\packages\nanoFramework.System.Text.1.3.42\lib\nanoFramework.System.Text.dll</HintPath>

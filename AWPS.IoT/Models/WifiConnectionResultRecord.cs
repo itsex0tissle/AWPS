@@ -1,4 +1,4 @@
-﻿namespace AWPS.IoT.MsgPack.Models
+﻿namespace AWPS.IoT.Models
 {
     public sealed class WifiConnectionResultRecord
     {

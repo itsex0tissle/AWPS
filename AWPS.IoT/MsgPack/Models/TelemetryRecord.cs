@@ -2,7 +2,7 @@
 
 namespace AWPS.IoT.MsgPack.Models
 {
-    public sealed class SensorsDataRecord
+    public sealed class TelemetryRecord
     {
         public long Timestamp { get; set; } = DateTime.UtcNow.Ticks;
         public byte Light { get; set; }

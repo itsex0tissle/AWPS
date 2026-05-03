@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Text;
 using System.Threading;
-using System.Diagnostics;
+using AWPS.IoT.Services;
 using System.Collections;
 using nanoFramework.M2Mqtt;
 using nanoFramework.M2Mqtt.Messages;
@@ -18,14 +18,14 @@ namespace AWPS.IoT.MqttInteraction
             string server_url = MqttResources.GetString(MqttResources.StringResources.ServerUrl);
             X509Certificate cert = new(MqttResources.GetString(MqttResources.StringResources.ServerCertificate));
             Mqtt = new MqttClient(server_url, 8883, true, cert, null, MqttSslProtocols.TLSv1_2);
-            Debug.WriteLine("Mqtt client created");
+            Logger.LogInfo("Mqtt client created");
         }
 
         public bool EnsureConnected(int retry = 5)
         {
             if(Mqtt.IsConnected is true)
             {
-                Debug.WriteLine("Mqtt client already connected");
+                Logger.LogInfo("Mqtt client already connected");
                 return true;
             }
             string username = MqttResources.GetString(MqttResources.StringResources.UserName);
@@ -38,21 +38,21 @@ namespace AWPS.IoT.MqttInteraction
                 {
                     throw new Exception($"Failed to connect to mqtt: ReasonCode = {code}");
                 }
-                Debug.WriteLine("Mqtt client connected");
+                Logger.LogInfo("Mqtt client connected");
             }, retry);
         }
         public byte[]? SendReceive(string send_topic, string receive_topic, byte[] buffer, int timeout = 10000, int retry = 5)
         {
-            Debug.WriteLine($"Send request on topic '{send_topic}'. Receive response on topic '{receive_topic}'");
+            Logger.LogInfo($"Send request on topic '{send_topic}'. Receive response on topic '{receive_topic}'");
             byte[]? response = null;
             bool response_got = false;
             Timer timer = new(delegate(object? state)
             {
-                Debug.WriteLine($"Receive response on topic '{receive_topic}' timeout");
+                Logger.LogWarning($"Receive response on topic '{receive_topic}' timeout");
                 response_got = true;
             }, null, timeout, Timeout.Infinite);
             Mqtt.MqttMsgPublishReceived += SaveMessage;
-            Debug.WriteLine("Subscribe and publish message");
+            Logger.LogInfo("Subscribe and publish message");
             bool success = Helper.Retry(delegate()
             {
                 if(EnsureConnected(retry) is false)
@@ -61,11 +61,11 @@ namespace AWPS.IoT.MqttInteraction
                 }
                 Mqtt.Subscribe(new string[] { receive_topic }, new MqttQoSLevel[] { MqttQoSLevel.AtLeastOnce });
                 Mqtt.Publish(send_topic, buffer, "", new ArrayList(), MqttQoSLevel.AtLeastOnce, false);
-                Debug.WriteLine("Subscribed and message published");
+                Logger.LogInfo("Subscribed and message published");
             }, retry);
             if(success is false)
             {
-                Debug.WriteLine("Subscribe and publish message failed");
+                Logger.LogWarning("Subscribe and publish message failed");
                 timer.Dispose();
                 return null;
             }
@@ -77,12 +77,12 @@ namespace AWPS.IoT.MqttInteraction
 
             void SaveMessage(object sender, MqttMsgPublishEventArgs event_args)
             {
-                Debug.WriteLine($"Response received on topic '{event_args.Topic}' in handler for '{receive_topic}' topic");
+                Logger.LogInfo($"Response received on topic '{event_args.Topic}' in handler for '{receive_topic}' topic");
                 if(event_args.Topic != receive_topic)
                 {
                     return;
                 }
-                Debug.WriteLine("Saving message");
+                Logger.LogInfo("Saving message");
                 response = event_args.Message;
                 response_got = true;
                 timer.Dispose();
@@ -95,7 +95,7 @@ namespace AWPS.IoT.MqttInteraction
                 if(SendReceive(send_topic, receive_topic, buffer, timeout, retry) is byte[] response)
                 {
                     bool result = Encoding.UTF8.GetString(response, 0, response.Length) is "true";
-                    Debug.WriteLine($"Response on topic '{receive_topic}': {result}");
+                    Logger.LogInfo($"Response on topic '{receive_topic}': {result}");
                     return result;
                 }
                 else

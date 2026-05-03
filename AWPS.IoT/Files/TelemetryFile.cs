@@ -1,14 +1,14 @@
 ﻿using System.IO;
+using AWPS.IoT.Services;
 using System.Collections;
-using System.Diagnostics;
 using AWPS.IoT.MsgPack.Models;
 using nanoFramework.MessagePack;
 
 namespace AWPS.IoT.Files
 {
-    public static class SensorsDataFile
+    public static class TelemetryFile
     {
-        public const string FilePath = "I:\\SensorsData.msgpk";
+        public const string FilePath = "I:\\Telemetry.msgpk";
 
         private static ArrayList? records;
 
@@ -28,35 +28,35 @@ namespace AWPS.IoT.Files
                 return new ArrayList();
             }
             byte[] content = File.ReadAllBytes(FilePath);
-            Debug.WriteLine($"'{FilePath}' file loaded");
-            var records = (SensorsDataRecord[])MessagePackSerializer.Deserialize(typeof(SensorsDataRecord[]), content)!;
+            Logger.LogInfo($"'{FilePath}' file loaded");
+            var records = (TelemetryRecord[])MessagePackSerializer.Deserialize(typeof(TelemetryRecord[]), content)!;
 
             ArrayList list = new();
-            foreach(SensorsDataRecord record in records)
+            foreach(TelemetryRecord record in records)
             {
                 list.Add(record);
             }
             return list;
         }
-        public static void Add(SensorsDataRecord record)
+        public static void Add(TelemetryRecord record)
         {
             Records.Add(record);
         }
-        public static void Remove(SensorsDataRecord record)
+        public static void Remove(TelemetryRecord record)
         {
             Records.Remove(record);
         }
-        public static int IndexOf(SensorsDataRecord record)
+        public static int IndexOf(TelemetryRecord record)
         {
             return Records.IndexOf(record);
         }
-        public static bool Contains(SensorsDataRecord record)
+        public static bool Contains(TelemetryRecord record)
         {
             return Records.Contains(record);
         }
-        public static SensorsDataRecord Get(int index)
+        public static TelemetryRecord Get(int index)
         {
-            return (SensorsDataRecord)Records[index];
+            return (TelemetryRecord)Records[index];
         }
         public static void RemoveAt(int index)
         {
@@ -69,13 +69,13 @@ namespace AWPS.IoT.Files
         public static void Save()
         {
             File.WriteAllBytes(FilePath, Serialize());
-            Debug.WriteLine($"'{FilePath}' file saved");
+            Logger.LogInfo($"'{FilePath}' file saved");
         }
         public static void Reset()
         {
             Records.Clear();
             File.Delete(FilePath);
-            Debug.WriteLine($"'{FilePath}' file deleted");
+            Logger.LogInfo($"'{FilePath}' file deleted");
         }
     }
 }

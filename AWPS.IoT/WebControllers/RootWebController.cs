@@ -1,5 +1,5 @@
 ﻿using System.Net;
-using System.Diagnostics;
+using AWPS.IoT.Services;
 using nanoFramework.WebServer;
 
 namespace AWPS.IoT.WebControllers
@@ -10,9 +10,9 @@ namespace AWPS.IoT.WebControllers
         [Method("GET")]
         public static void Ping(WebServerEventArgs event_args)
         {
-            Debug.WriteLine("'GET' request on path '/'");
+            Logger.LogInfo("'GET' request on path '/'");
             WebController.SendStatusCode(event_args.Context.Response, HttpStatusCode.OK);
-            Debug.WriteLine("'GET' response on path '/'");
+            Logger.LogInfo("'GET' response on path '/'");
         }
     }
 }

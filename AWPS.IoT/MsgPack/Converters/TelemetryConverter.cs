@@ -6,10 +6,10 @@ using nanoFramework.MessagePack.Converters;
 
 namespace AWPS.IoT.MsgPack.Converters
 {
-    public sealed class SensorsDataRecordConverter : IConverter
+    public sealed class TelemetryConverter : IConverter
     {
         #region Static
-        private static void InternalWrite(SensorsDataRecord obj, IMessagePackWriter writer)
+        private static void InternalWrite(TelemetryRecord obj, IMessagePackWriter writer)
         {
             IConverter long_converter = ConverterContext.GetConverter(typeof(long));
             IConverter byte_converter = ConverterContext.GetConverter(typeof(byte));
@@ -20,12 +20,12 @@ namespace AWPS.IoT.MsgPack.Converters
             byte_converter.Write(obj.Humidity, writer);
             sbyte_converter.Write(obj.Temperature, writer);
         }
-        private static SensorsDataRecord InternalRead(IMessagePackReader reader)
+        private static TelemetryRecord InternalRead(IMessagePackReader reader)
         {
             IConverter long_converter = ConverterContext.GetConverter(typeof(long));
             IConverter byte_converter = ConverterContext.GetConverter(typeof(byte));
             IConverter sbyte_converter = ConverterContext.GetConverter(typeof(sbyte));
-            return new SensorsDataRecord()
+            return new TelemetryRecord()
             {
                 Timestamp = (long)long_converter.Read(reader)!,
                 Light = (byte)byte_converter.Read(reader)!,
@@ -39,11 +39,11 @@ namespace AWPS.IoT.MsgPack.Converters
         #region IConverter
         public void Write(object? obj, [NotNull] IMessagePackWriter writer)
         {
-            SensorsDataRecordConverter.InternalWrite((SensorsDataRecord)obj!, writer);
+            TelemetryConverter.InternalWrite((TelemetryRecord)obj!, writer);
         }
         public object? Read([NotNull] IMessagePackReader reader)
         {
-            return SensorsDataRecordConverter.InternalRead(reader);
+            return TelemetryConverter.InternalRead(reader);
         }
         #endregion
     }

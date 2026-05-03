@@ -1,6 +1,5 @@
 ﻿using System;
-using System.Collections;
-using System.Diagnostics;
+using AWPS.IoT.Services;
 using nanoFramework.Hardware.Esp32;
 using System.Diagnostics.CodeAnalysis;
 
@@ -14,8 +13,9 @@ namespace AWPS.IoT
             {
                 try
                 {
-                    Debug.WriteLine($"[Attempt: {count}]");
+                    Logger.AddPrefix($"Attempt {count}");
                     action();
+                    Logger.RemoveLastPrefix();
                     return true;
                 }
                 catch { }
@@ -24,19 +24,10 @@ namespace AWPS.IoT
         }
         [DoesNotReturn] public static void EnterDeepSleep(TimeSpan restart_in)
         {
-            Debug.WriteLine($"Enter deep sleep. Restart in: {restart_in}");
+            Logger.LogInfo($"Enter deep sleep. Restart in: {restart_in}");
             Sleep.EnableWakeupByTimer(restart_in);
             Sleep.StartDeepSleep();
             throw new Exception("Impossible exception");
-        }
-        public static object? LastOrDefault(this IEnumerable instance)
-        {
-            object? last = null;
-            foreach(object item in instance)
-            {
-                last = item;
-            }
-            return last;
         }
     }
 }

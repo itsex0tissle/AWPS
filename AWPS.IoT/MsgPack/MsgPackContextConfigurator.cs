@@ -8,11 +8,7 @@ namespace AWPS.IoT.MsgPack
     {
         public static void Setup()
         {
-            ConverterContext.Add(typeof(WifiStateRecord), new WifiStateRecordConverter());
-            ConverterContext.Add(typeof(WifiCredentialsRecord), new WifiCredentialsRecordConverter());
-            ConverterContext.Add(typeof(WifiConnectionResultRecord), new WifiConnectionResultRecordConverter());
-            ConverterContext.Add(typeof(WifiAvailableNetworkRecord), new WifiAvailableNetworkRecordConverter());
-            ConverterContext.Add(typeof(SensorsDataRecord), new SensorsDataRecordConverter());
+            ConverterContext.Add(typeof(TelemetryRecord), new TelemetryConverter());
         }
     }
 }

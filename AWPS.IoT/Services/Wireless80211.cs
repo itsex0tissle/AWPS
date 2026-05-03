@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Threading;
 using System.Device.Wifi;
-using System.Diagnostics;
 using System.Net.NetworkInformation;
 
 namespace AWPS.IoT.Services
@@ -73,7 +72,7 @@ namespace AWPS.IoT.Services
             Wireless80211Configuration configuration = GetConfiguration();
             if (result is not WifiConnectionStatus.Success)
             {
-                Debug.WriteLine($"Failed to connect to wifi network: {ssid}");
+                Logger.LogWarning($"Failed to connect to wifi network: {ssid}");
                 if (ssid != configuration.Ssid || password != configuration.Password)
                 {
                     TryConnect(configuration.Ssid, configuration.Password);
@@ -81,7 +80,7 @@ namespace AWPS.IoT.Services
             }
             else
             {
-                Debug.WriteLine($"Connected to wifi network: {ssid}");
+                Logger.LogInfo($"Connected to wifi network: {ssid}");
                 configuration.Ssid = ssid;
                 configuration.Password = password;
                 configuration.SaveConfiguration();
@@ -94,10 +93,10 @@ namespace AWPS.IoT.Services
                 {
                     result = sender.Connect(ssid, WifiReconnectionKind.Automatic, password).ConnectionStatus;
                 }
-                catch (Exception ex)
+                catch (Exception exception)
                 {
                     result = WifiConnectionStatus.UnspecifiedFailure;
-                    Debug.WriteLine($"Failed to connect to wifi network: SSID = {ssid}; Exception = {ex}");
+                    Logger.LogException(exception);
                 }
                 finally
                 {
@@ -113,7 +112,7 @@ namespace AWPS.IoT.Services
             configuration.Ssid = ssid;
             configuration.Password = password;
             configuration.SaveConfiguration();
-            Debug.WriteLine($"New wifi saved: {ssid}");
+            Logger.LogInfo($"New wifi saved: {ssid}");
         }
     }
 }

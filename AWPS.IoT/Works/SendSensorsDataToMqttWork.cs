@@ -1,6 +1,6 @@
 ﻿using System;
 using AWPS.IoT.Files;
-using System.Diagnostics;
+using AWPS.IoT.Services;
 using AWPS.IoT.MqttInteraction;
 
 namespace AWPS.IoT.Works
@@ -9,21 +9,26 @@ namespace AWPS.IoT.Works
     {
         public static void Start(int timeout = 10000, int retry = 5)
         {
+            Logger.LogInfo($"{nameof(SendSensorsDataToMqttWork)} started");
             try
             {
-                Debug.WriteLine("SendSensorsDataToMqttWork started");
-                MqttInteractor interactor = new();
-                byte[] request = SensorsDataFile.Serialize();
-                if(interactor.SendConfirm("sensors-data/request", "sensors-data/response", request, timeout, retry) is true)
+                if(AccountFile.Record.DeviceProfileId is not string device_profile_id)
                 {
-                    SensorsDataFile.Reset();
+                    Logger.LogWarning("No device profile setted. Can`t continue work");
+                    return;
                 }
-                Debug.WriteLine("SendSensorsDataToMqttWork finished");
+                MqttInteractor interactor = new();
+                byte[] request = TelemetryFile.Serialize();
+                if(interactor.SendConfirm($"{device_profile_id}/telemetry/request", $"{device_profile_id}/telemetry/response", request, timeout, retry) is true)
+                {
+                    TelemetryFile.Reset();
+                }
             }
-            catch(Exception exc)
+            catch(Exception exception)
             {
-                Debug.WriteLine($"SendSensorsDataToMqttWork failed: {exc}");
+                Logger.LogException(exception);
             }
+            Logger.LogInfo($"{nameof(SendSensorsDataToMqttWork)} finished");
         }
     }
 }

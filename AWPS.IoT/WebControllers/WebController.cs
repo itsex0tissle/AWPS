@@ -1,4 +1,6 @@
 ﻿using System.Net;
+using System.Text;
+using nanoFramework.Json;
 using nanoFramework.MessagePack;
 
 namespace AWPS.IoT.WebControllers
@@ -29,6 +31,14 @@ namespace AWPS.IoT.WebControllers
             response.ContentType = content_type;
             response.ContentLength64 = content.Length;
             response.OutputStream.Write(content, 0, content.Length);
+        }
+        public static void SendString(HttpListenerResponse response, string content, string content_type = "plain/text")
+        {
+            SendStream(response, Encoding.UTF8.GetBytes(content), content_type);
+        }
+        public static void SendJson(HttpListenerResponse response, object obj)
+        {
+            SendString(response, JsonConvert.SerializeObject(obj), "application/json");
         }
         public static void SendObject(HttpListenerResponse response, object? obj)
         {

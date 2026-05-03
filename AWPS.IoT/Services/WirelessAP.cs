@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics;
 using nanoFramework.Runtime.Native;
 using System.Net.NetworkInformation;
 
@@ -46,7 +45,7 @@ namespace AWPS.IoT.Services
             configuration.Encryption = EncryptionType.None;
             configuration.Options = WirelessAPConfiguration.ConfigurationOptions.AutoStart;
             configuration.SaveConfiguration();
-            Debug.WriteLine("WirelessAP enabled");
+            Logger.LogInfo("WirelessAP enabled");
             Power.RebootDevice();
         }
         public static void Disable()
@@ -58,7 +57,7 @@ namespace AWPS.IoT.Services
             WirelessAPConfiguration configuration = GetConfiguration();
             configuration.Options = WirelessAPConfiguration.ConfigurationOptions.Disable;
             configuration.SaveConfiguration();
-            Debug.WriteLine("WirelessAP disabled");
+            Logger.LogInfo("WirelessAP disabled");
             Power.RebootDevice();
         }
     }

@@ -1,50 +1,50 @@
 ﻿using System;
 using AWPS.IoT.Files;
 using System.Threading;
+using AWPS.IoT.Services;
 using System.Device.Gpio;
-using System.Diagnostics;
 using AWPS.IoT.MsgPack.Models;
 
 namespace AWPS.IoT.Works
 {
     public static class WateringWork
     {
-        private static double DrynessIndex(SensorsDataRecord record)
+        private static double DrynessIndex(TelemetryRecord record)
         {
             return (100 - record.Moisture) * 0.5 + record.Temperature * 0.5 + record.Light * 0.1 - record.Humidity * 0.1;
         }
         public static void Start()
         {
+            Logger.LogInfo($"{nameof(WateringWork)} started");
             try
             {
-                Debug.WriteLine("WateringWork started");
-                if(SensorsDataFile.Count is 0)
+                if(TelemetryFile.Count is 0)
                 {
-                    Debug.WriteLine("No sensors data available. Can`t continue watering");
+                    Logger.LogWarning("No telemetry available. Can`t continue work");
                     return;
                 }
-                SensorsDataRecord record = SensorsDataFile.Get(SensorsDataFile.Count - 1);
+                TelemetryRecord record = TelemetryFile.Get(TelemetryFile.Count - 1);
                 double dryness = DrynessIndex(record);
-                Debug.WriteLine($"Dryness: {dryness}");
+                Logger.LogInfo($"Dryness: {dryness}");
                 if(dryness >= 50.0)
                 {
-                    Debug.WriteLine("Turn on watering for 5s");
+                    Logger.LogInfo("Turn on watering for 5s");
                     using GpioPin pin = new GpioController().OpenPin(27, PinMode.Output);
                     pin.Write(PinValue.High);
                     Thread.Sleep(5000);
                     pin.Write(PinValue.Low);
-                    Debug.WriteLine("Watering turned off");
+                    Logger.LogInfo("Watering turned off");
                 }
                 else
                 {
-                    Debug.WriteLine("Dryness too low to continue work");
+                    Logger.LogWarning("Dryness too low. Can`t continue work");
                 }
-                Debug.WriteLine("WateringWork finished");
             }
-            catch(Exception exc)
+            catch(Exception exception)
             {
-                Debug.WriteLine($"WateringWork failed: {exc}");
+                Logger.LogException(exception);
             }
+            Logger.LogInfo($"{nameof(WateringWork)} finished");
         }
     }
 }

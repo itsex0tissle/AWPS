@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Net;
+using AWPS.IoT.Helpers;
 using AWPS.IoT.MsgPack;
 using System.Threading;
 using AWPS.IoT.Services;
 using Iot.Device.Button;
 using System.Diagnostics;
+using nanoFramework.Json;
 using Iot.Device.DhcpServer;
 using AWPS.IoT.WebControllers;
 using nanoFramework.WebServer;
@@ -20,34 +22,38 @@ namespace AWPS.IoT.Works
         {
             Power.OnRebootEvent += delegate()
             {
-                Debug.WriteLine("Rebooting...");
+                Logger.LogInfo("Rebooting...");
             };
             NetworkChange.NetworkAddressChanged += delegate(object sender, EventArgs event_args)
             {
                 if(Wireless80211.Connected is true)
                 {
-                    Debug.WriteLine("Wifi connected");
+                    Logger.LogInfo("Wifi connected");
                 }
                 else
                 {
-                    Debug.WriteLine("Wifi disconnected");
-                }
+                    Logger.LogInfo("Wifi disconnected");
+                }   
             };
             NetworkChange.NetworkAPStationChanged += delegate(int station_index, NetworkAPStationEventArgs event_args)
             {
-                if (event_args.IsConnected is true)
+                if(event_args.IsConnected is true)
                 {
-                    Debug.WriteLine("External device connected to AP");
+                    Logger.LogInfo("External device connected to AP");
                 }
                 else
                 {
-                    Debug.WriteLine("External device disconnected from AP");
+                    Logger.LogInfo("External device disconnected from AP");
                 }
             };
-            if (Wireless80211.Connected is true)
+            if(Wireless80211.Connected is true)
             {
-                Debug.WriteLine("Wifi connected");
+                Logger.LogInfo("Wifi connected");
             }
+        }
+        private static void GlobalSetup()
+        {
+            JsonSerializerOptions.Default.PropertyNameCaseInsensitive = true;
         }
         private static void EnableButton()
         {
@@ -63,18 +69,18 @@ namespace AWPS.IoT.Works
                     WirelessAP.Disable();
                 }
             };
-            Debug.Write("Button enabled");
+            Logger.LogInfo("Button enabled");
         }
         private static void StartDhcpServerIfWirelessAPEnabled()
         {
-            if(WirelessAP.Enabled is true)
+            if (WirelessAP.Enabled is true)
             {
-                if(new DhcpServer().Start(IPAddress.Parse(WirelessAP.IP), IPAddress.Parse(WirelessAP.Mask)) is false)
+                if (new DhcpServer().Start(IPAddress.Parse(WirelessAP.IP), IPAddress.Parse(WirelessAP.Mask)) is false)
                 {
-                    Debug.WriteLine("DHCP-server start failed");
+                    Logger.LogError("DHCP server start failed");
                     Power.RebootDevice();
                 }
-                Debug.WriteLine("DHCP-server started");
+                Logger.LogInfo("DHCP server started");
             }
         }
         private static void EnableTimeoutForWirelessAP()
@@ -87,20 +93,20 @@ namespace AWPS.IoT.Works
                     if (event_args.IsConnected is true)
                     {
                         timer?.Dispose();
-                        Debug.WriteLine("WirelessAP timeout disabled");
+                        Logger.LogInfo($"{nameof(WirelessAP)} timeout timer disabled");
                     }
                     else
                     {
-                        Debug.WriteLine("WirelessAP timeout enabled");
+                        Logger.LogInfo($"{nameof(WirelessAP)} timeout timer enabled");
                         timer?.Dispose();
                         timer = new Timer(DisableWirelessAP, null, 60000, Timeout.Infinite);
                     }
                 };
-                Debug.WriteLine("WirelessAP timeout enabled");
+                Logger.LogInfo($"{nameof(WirelessAP)} timeout timer enabled");
 
                 static void DisableWirelessAP(object? state)
                 {
-                    Debug.WriteLine("WirelessAP timeout");
+                    Logger.LogWarning($"{nameof(WirelessAP)} timeout occurred");
                     WirelessAP.Disable();
                 }
             }
@@ -116,80 +122,80 @@ namespace AWPS.IoT.Works
             {
                 if(event_args.IsConnected is true)
                 {
-                    if(web_server.IsRunning is false && web_server.Start() is true)
-                    {
-                        Debug.WriteLine($"WebServer started. Listening on: 'http://{WirelessAP.IP}:80'");
-                    }
-                    else
-                    {
-                        Debug.WriteLine("WebServer start failed");
-                        Power.RebootDevice();
-                    }
+                    StartWebServer();
                 }
                 else
                 {
-                    if(web_server.IsRunning is true)
-                    {
-                        web_server.Stop();
-                        Debug.WriteLine("WebServer stopped");
-                    }
+                    StopWebServer();
                 }
             };
             if(WirelessAP.GetConfiguration().GetConnectedStations().Length > 0)
             {
+                StartWebServer();
+            }
+
+            void StartWebServer()
+            {
                 if(web_server.IsRunning is false && web_server.Start() is true)
                 {
-                    Debug.WriteLine($"WebServer started. Listening on: 'http://{WirelessAP.IP}:80'");
+                    Logger.LogInfo($"Web server started. Listening on: 'http://{WirelessAP.IP}:80'");
                 }
                 else
                 {
-                    Debug.WriteLine("WebServer start failed");
+                    Logger.LogError("Web server start failed");
                     Power.RebootDevice();
+                }
+            }
+            void StopWebServer()
+            {
+                if(web_server.IsRunning is true)
+                {
+                    web_server.Stop();
+                    Logger.LogInfo("Web server stopped");
                 }
             }
         }
         private static void EnsureUtcNowIsValid()
         {
-            if(DateTime.UtcNow.Year >= 2026)
+            if(DateTimeHelper.UtcNowValid is true)
             {
-                Debug.WriteLine("System time is UTC");
+                Logger.LogInfo("System time is UTC");
                 return;
             }
-            Debug.WriteLine("System time is not UTC. Wait 10s for wifi reconnection");
+            Logger.LogWarning("System time is not UTC. Wait 10s for wifi reconnection");
             CancellationTokenSource timeout = new(10000);
             WifiNetworkHelper.Reconnect(requiresDateTime: true, token: timeout.Token);
-            if(DateTime.UtcNow.Year >= 2026)
+            if(DateTimeHelper.UtcNowValid is true)
             {
-                Debug.WriteLine("System time is UTC");
+                Logger.LogInfo("System time is UTC");
                 return;
             }
-            Debug.Write("System time is not UTC. ");
+            Logger.LogError("System time still not UTC");
             Helper.EnterDeepSleep(TimeSpan.FromMinutes(5));
         }
         public static void Start()
         {
+            Logger.LogInfo($"{nameof(PrepareDeviceWork)} started");
             try
             {
-                Debug.WriteLine("PrepareDeviceWork started");
                 AddDebugLogs();
+                GlobalSetup();
                 EnableButton();
                 MsgPackContextConfigurator.Setup();
                 StartDhcpServerIfWirelessAPEnabled();
                 EnableTimeoutForWirelessAP();
                 ToogleWebServerOnNetworkAPStationChanged();
-                if (WirelessAP.Enabled is true)
+                if(WirelessAP.Enabled is true)
                 {
-                    Debug.WriteLine("Device mode: Configuration");
                     Thread.Sleep(Timeout.Infinite);
                 }
-                Debug.WriteLine("Device mode: Work");
                 EnsureUtcNowIsValid();
-                Debug.WriteLine("PrepareDeviceWork finished");
             }
             catch(Exception exc)
             {
-                Debug.WriteLine($"PrepareDeviceWork failed: {exc}");
+                Logger.LogError(exc.ToString());
             }
+            Logger.LogInfo($"{nameof(PrepareDeviceWork)} finished");
         }
     }
 }

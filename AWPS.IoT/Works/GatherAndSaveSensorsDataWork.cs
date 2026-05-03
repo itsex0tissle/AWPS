@@ -1,7 +1,7 @@
 ﻿using System;
 using AWPS.IoT.Files;
 using System.Device.Adc;
-using System.Diagnostics;
+using AWPS.IoT.Services;
 using Iot.Device.DHTxx.Esp32;
 using AWPS.IoT.MsgPack.Models;
 
@@ -11,9 +11,9 @@ namespace AWPS.IoT.Works
     {
         public static void Start(int measure_count = 10, int retry = 5)
         {
+            Logger.LogInfo($"{nameof(GatherAndSaveSensorsDataWork)} started");
             try
             {
-                Debug.WriteLine("GatherAndSaveSensorsDataWork started");
                 AdcController controller = new();
                 AdcChannel light_sensor = controller.OpenChannel(4);
                 AdcChannel moisture_sensor = controller.OpenChannel(5);
@@ -31,22 +31,22 @@ namespace AWPS.IoT.Works
                         humidity += dht11.Humidity.Percent;
                         temperature += dht11.Temperature.DegreesCelsius;
                     }
-                    SensorsDataRecord record = new()
+                    TelemetryRecord record = new()
                     {
                         Light = (byte)(light * 100 / measure_count),
                         Moisture = (byte)(moisture * 100 / measure_count),
                         Humidity = (byte)(humidity / measure_count),
                         Temperature = (sbyte)(temperature / measure_count),
                     };
-                    SensorsDataFile.Add(record);
-                    SensorsDataFile.Save();
+                    TelemetryFile.Add(record);
+                    TelemetryFile.Save();
                 }, retry);
-                Debug.WriteLine("GatherAndSaveSensorsDataWork finished");
             }
             catch(Exception exc)
             {
-                Debug.WriteLine($"GatherAndSaveSensorsDataWork failed: {exc}");
+                Logger.LogError(exc.ToString());
             }
+            Logger.LogInfo($"{nameof(GatherAndSaveSensorsDataWork)} finished");
         }
     }
 }
