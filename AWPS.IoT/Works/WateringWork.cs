@@ -26,8 +26,12 @@ namespace AWPS.IoT.Works
                 TelemetryRecord record = TelemetryFile.Get(TelemetryFile.Count - 1);
                 double dryness = DrynessIndex(record);
                 Logger.LogInfo($"Dryness: {dryness}");
-                if(dryness >= 50.0)
+                double dryness_limit = DeviceStateFile.Record.WareringInProcess is true ? 30.0 : 50.0;
+                if(dryness >= dryness_limit)
                 {
+                    DeviceStateFile.Record.WareringInProcess = true;
+                    DeviceStateFile.Save();
+
                     Logger.LogInfo("Turn on watering for 5s");
                     using GpioPin pin = new GpioController().OpenPin(27, PinMode.Output);
                     pin.Write(PinValue.High);
@@ -37,6 +41,9 @@ namespace AWPS.IoT.Works
                 }
                 else
                 {
+                    DeviceStateFile.Record.WareringInProcess = false;
+                    DeviceStateFile.Save();
+
                     Logger.LogWarning("Dryness too low. Can`t continue work");
                 }
             }

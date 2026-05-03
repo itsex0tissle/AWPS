@@ -20,10 +20,12 @@
   <Import Project="$(NanoFrameworkProjectSystemPath)NFProjectSystem.props" Condition="Exists('$(NanoFrameworkProjectSystemPath)NFProjectSystem.props')" />
   <ItemGroup>
     <Compile Include="Files\AccountFile.cs" />
+    <Compile Include="Files\DeviceStateFile.cs" />
     <Compile Include="Files\TelemetryFile.cs" />
     <Compile Include="Helpers\DateTimeHelper.cs" />
     <Compile Include="Helpers\Helper.cs" />
     <Compile Include="Models\AccountRecord.cs" />
+    <Compile Include="Models\DeviceStateRecord.cs" />
     <Compile Include="MsgPack\Converters\TelemetryConverter.cs" />
     <Compile Include="MsgPack\Models\TelemetryRecord.cs" />
     <Compile Include="Models\WifiAvailableNetworkRecord.cs" />

@@ -1,4 +1,5 @@
 using System;
+using AWPS.IoT.Files;
 using AWPS.IoT.Works;
 using System.Threading;
 using AWPS.IoT.Services;
@@ -26,6 +27,10 @@ namespace AWPS.IoT
             }
             finally
             {
+                if(DeviceStateFile.Record.WareringInProcess is true)
+                {
+                    Helper.EnterDeepSleep(TimeSpan.FromMinutes(1));
+                }
                 Helper.EnterDeepSleep(TimeSpan.FromSeconds(30));
             }
             Logger.LogInfo($"{nameof(Program)}.{nameof(Main)} finished");
