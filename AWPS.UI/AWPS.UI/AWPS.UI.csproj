@@ -18,6 +18,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <EnableDefaultCssItems>false</EnableDefaultCssItems>
     <Nullable>enable</Nullable>
+	<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 
     <!-- Display name -->
     <ApplicationTitle>AWPS.UI</ApplicationTitle>

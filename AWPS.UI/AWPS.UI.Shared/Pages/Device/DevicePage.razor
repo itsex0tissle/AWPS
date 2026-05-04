@@ -1,10 +1,15 @@
-@page "/Device"
+@page "/Device/{Id}"
+@attribute [Authorize]
+@code
+{
+    [Parameter] public required string Id { get; set; }
+}
 
 @if(base.RendererInfo.Name is not Renderer.WebView)
 {
-    <DevicePageContent @rendermode=@RenderMode.InteractiveWebAssembly />
+    <DevicePageContent Id=@Id @rendermode=@RenderMode.InteractiveWebAssembly />
 }
 else
 {
-    <DevicePageContent />
+    <DevicePageContent Id=@Id />
 }

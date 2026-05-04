@@ -1,5 +1,9 @@
 ﻿<Router AppAssembly=@typeof(MainLayout).Assembly NotFoundPage=@typeof(NotFoundPage)>
     <Found Context="route_data">
-        <RouteView RouteData=@route_data DefaultLayout=@typeof(MainLayout) />
+        <AuthorizeRouteView RouteData=@route_data DefaultLayout=@typeof(MainLayout)>
+            <NotAuthorized>
+                <LoginPage />
+            </NotAuthorized>
+        </AuthorizeRouteView>
     </Found>
 </Router>

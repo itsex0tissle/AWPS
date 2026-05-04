@@ -5,13 +5,13 @@
     [Parameter] public bool IsSelected { get; set; }
     [Parameter] public EventCallback ReloadState { get; set; }
     [Parameter] public EventCallback<int> OnSelect { get; set; }
-    [Parameter] public required WifiAvailableNetworkResponse Network { get; set; }
+    [Parameter] public required WifiAvailableNetworkRecord Network { get; set; }
     [Parameter] public required DeviceNotConnectedModal ModalRef { get; set; }
 }
 @code
 {
     private string Password { get; set; } = "";
-    private WifiConnectionResultResponse? WifiConnectionResult { get; set; }
+    private WifiConnectionResultRecord? WifiConnectionResult { get; set; }
 
     private async Task SelectThis()
     {
@@ -24,7 +24,7 @@
         {
             if (await ModalRef.SendPing() is true)
             {
-                WifiConnectionResult = await DeviceInteractor.ConnectToWifi(new WifiCredentialsRequest()
+                WifiConnectionResult = await DeviceInteractor.ConnectToWifi(new WifiCredentialsRecord()
                 {
                     SSID = Network.SSID,
                     Password = Password
@@ -37,7 +37,7 @@
         }
         catch
         {
-            WifiConnectionResult = new WifiConnectionResultResponse()
+            WifiConnectionResult = new WifiConnectionResultRecord()
             {
                 Connected = false,
                 Message = "Unexpected error"

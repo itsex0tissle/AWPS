@@ -1,5 +1,9 @@
 ﻿@code
 {
+    [Parameter] public required string Id { get; set; }
+}
+@code
+{
     private Type SelectedTab { get; set; } = typeof(DeviceHomeTab);
 
     private void SaveTab(Type tab)
@@ -8,7 +12,7 @@
     }
 }
 
-<LoadScreen>   
+<LoadScreen>
     <div class="flex min-h-screen w-full">
         <aside class="w-72">
             <div class="flex h-full flex-col border-r border-emerald-200 bg-emerald-950/95 text-white shadow-2xl shadow-emerald-950/20">
@@ -22,6 +26,9 @@
                     <DeviceNavSideButton OnSelect=@SaveTab
                                          TTab="DeviceWifiTab"
                                          Selected=@(SelectedTab == typeof(DeviceWifiTab))>Wifi</DeviceNavSideButton>
+                    <DeviceNavSideButton OnSelect=@SaveTab
+                                         TTab="DeviceAccountTab"
+                                         Selected=@(SelectedTab == typeof(DeviceAccountTab))>Account</DeviceNavSideButton>
                 </nav>
             </div>
         </aside>
@@ -33,6 +40,10 @@
             else if (SelectedTab == typeof(DeviceWifiTab))
             {
                 <DeviceWifiTab />
+            }
+            else if (SelectedTab == typeof(DeviceAccountTab))
+            {
+                <DeviceAccountTab Id=@Id />
             }
         </main>
     </div>

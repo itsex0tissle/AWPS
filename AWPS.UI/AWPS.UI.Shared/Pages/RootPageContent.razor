@@ -1,110 +1,54 @@
-﻿@inject HubConnection HubConnection
-@inject IApplicationDatabaseInteractor DatabaseInteractor
-@implements IAsyncDisposable
-@code
-{
-    public async ValueTask DisposeAsync()
-    {
-        HubConnection.Remove("UpdateClient");
-        await HubConnection.StopAsync();
-    }
-}
-@code
-{
-    private MeasuringDataModel[] Data = [];
-    private ApexChart<MeasuringDataModel>? Chart;
-    private string SelectedMetric
-    {
-        get => field;
-        set
-        {
-            field = value;
-            _ = Chart?.UpdateSeriesAsync();
-        }
-    } = "Light";
-    private ApexChartOptions<MeasuringDataModel> ChartOptions = new();
+﻿@inject IApplicationDbInteractor ApplicationDb
+@inject NavigationManager NavigationManager
+
+<LoadScreen>  
+    <NavBar>
+        <div class="space-y-4 p-6">
+
+            <CreateProfileButton OnCreated="OnProfileCreated" />
+
+            @if (Profiles is null)
+            {
+                <div class="text-gray-500">Loading...</div>
+            }
+            else if (Profiles.Length == 0)
+            {
+                <div class="py-10 text-center text-gray-500">
+                    No profiles yet
+                </div>
+            }
+            else
+            {
+                @foreach (var profile in Profiles)
+                {
+                    <DeviceProfileButton Profile="profile" OnChanged="LoadProfiles" />
+                }
+            }
+
+        </div>
+    </NavBar>
+</LoadScreen>
+
+@code {
+    private DeviceProfileEntity[]? Profiles;
 
     protected override async Task OnInitializedAsync()
     {
-        Data = DatabaseInteractor.GetMeasuringDataSet();
-        ChartOptions = new ApexChartOptions<MeasuringDataModel>
-        {
-            Chart = new Chart
-            {
-                Type = ChartType.Line,
-                Height = 350
-            },
-            Stroke = new Stroke
-            {
-                Curve = new CurveSelections(Curve.Smooth)
-            },
-            Xaxis = new XAxis
-            {
-                Type = XAxisType.Datetime
-            }
-        };
-        HubConnection.On("UpdateClient", async void () =>
-        {
-            Data = DatabaseInteractor.GetMeasuringDataSet();
-            if (Chart is not null)
-            {
-                await Chart.UpdateSeriesAsync();
-            }
-            await InvokeAsync(StateHasChanged);
-        });
-        await HubConnection.StartAsync();
+        await LoadProfiles();
     }
 
-    private decimal? GetYValue(MeasuringDataModel m)
+    private async Task LoadProfiles()
     {
-        return SelectedMetric switch
+        var result = await ApplicationDb.GetDeviceProfiles();
+        if (result.IsSuccess)
         {
-            "Light" => m.Light,
-            "Moisture" => m.Moisture,
-            "Humidity" => m.Humidity,
-            "Temperature" => m.Temperature,
-            _ => 0
-        };
-    }
-    protected override async Task OnParametersSetAsync()
-    {
-        if (Chart != null)
-        {
-            await Chart.UpdateSeriesAsync();
+            Profiles = result.Value;
         }
     }
-    private async Task ClearData()
+
+    private async Task OnProfileCreated(DeviceProfileEntity profile)
     {
-        DatabaseInteractor.ClearMeasuringData();
-        Data = [];
-        if (Chart is not null)
-        {
-            await Chart.UpdateSeriesAsync();
-        }
-        await InvokeAsync(StateHasChanged);
+        // автоперехід
+        NavigationManager.NavigateTo($"/Profile/{profile.Id}");
     }
 }
-
-<LoadScreen>
-    <div class="p-6">
-        <div class="mb-6 flex items-center justify-between">
-            <h1 class="text-3xl font-bold text-gray-800">Sensor Measurements</h1>
-            <a href="/Device" class="rounded-lg bg-blue-600 px-4 py-2 text-white shadow hover:bg-blue-700">Configure Device</a>
-        </div>
-        <div class="rounded-xl bg-white p-6 shadow">
-            <div class="mb-4">
-                <label class="mb-1 block text-sm font-medium text-gray-600">Select parameter</label>
-                <select @bind="SelectedMetric" class="w-64 rounded-lg border px-3 py-2">
-                    <option value="Light">Light</option>
-                    <option value="Moisture">Soil Moisture</option>
-                    <option value="Humidity">Air Humidity</option>
-                    <option value="Temperature">Temperature</option>
-                </select>
-                <button @onclick="ClearData" class="h-10 rounded-lg bg-red-600 px-4 text-white shadow hover:bg-red-700">Clear Data</button>
-            </div>
-            <ApexChart TItem="MeasuringDataModel" Options="ChartOptions" @ref="Chart">
-                <ApexPointSeries TItem="MeasuringDataModel" Items="Data" Name="@SelectedMetric" XValue="@(x => x.Timestamp)" YValue="GetYValue" />
-            </ApexChart>
-        </div>
-    </div>
-</LoadScreen>

@@ -1,0 +1,122 @@
+﻿@inject NavigationManager NavigationManager
+@inject IApplicationDbInteractor ApplicationDb
+
+<div class="flex w-full items-center justify-between rounded-2xl border border-green-200 bg-white px-5 py-4 shadow-sm transition hover:bg-green-50">
+
+    @if (!IsEditing)
+    {
+        <!-- View mode -->
+        <button @onclick="OpenProfile"
+                class="flex-1 truncate text-left font-medium text-green-800">
+            @Profile.Name
+        </button>
+
+        <div class="ml-4 flex items-center gap-2">
+
+            <!-- Rename -->
+            <button @onclick="StartEdit"
+                    class="rounded-lg p-2 transition hover:bg-green-100">
+                ✏️
+            </button>
+
+            <!-- Delete -->
+            <button @onclick="Delete"
+                    class="rounded-lg p-2 text-red-600 transition hover:bg-red-100">
+                🗑️
+            </button>
+
+            <!-- Arrow -->
+            <button @onclick="OpenProfile"
+                    class="rounded-lg p-2 transition hover:bg-green-100">
+                <svg xmlns="http://www.w3.org/2000/svg"
+                     class="h-5 w-5 text-green-500"
+                     fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                          stroke-width="2" d="M9 5l7 7-7 7" />
+                </svg>
+            </button>
+
+        </div>
+    }
+    else
+    {
+        <!-- Edit mode -->
+        <input @bind="EditName"
+               @bind:event="oninput"
+               @onkeydown="HandleKeyDown"
+               class="flex-1 rounded-xl border border-green-300 px-3 py-2 focus:ring-2 focus:ring-green-400 focus:outline-none" />
+
+        <div class="ml-4 flex items-center gap-2">
+
+            <button @onclick="Save"
+                    class="rounded-lg bg-green-600 px-3 py-1 text-white transition hover:bg-green-500">
+                OK
+            </button>
+
+            <button @onclick="Cancel"
+                    class="rounded-lg border px-3 py-1 transition hover:bg-gray-100">
+                Cancel
+            </button>
+
+        </div>
+    }
+
+</div>
+
+@code {
+    [Parameter] public DeviceProfileEntity Profile { get; set; } = default!;
+    [Parameter] public EventCallback OnChanged { get; set; }
+
+    private bool IsEditing;
+    private string EditName = "";
+
+    private void OpenProfile()
+    {
+        NavigationManager.NavigateTo($"/Profile/{Profile.Id}");
+    }
+
+    private void StartEdit()
+    {
+        EditName = Profile.Name;
+        IsEditing = true;
+    }
+
+    private void Cancel()
+    {
+        IsEditing = false;
+    }
+
+    private async Task HandleKeyDown(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+        {
+            await Save();
+        }
+    }
+
+    private async Task Save()
+    {
+        if (string.IsNullOrWhiteSpace(EditName))
+            return;
+
+        Profile.Name = EditName;
+
+        var result = await ApplicationDb.UpdateDeviceProfile(Profile);
+
+        if (result.IsSuccess)
+        {
+            IsEditing = false;
+            await OnChanged.InvokeAsync();
+        }
+    }
+
+    private async Task Delete()
+    {
+        var result = await ApplicationDb.DeleteDeviceProfile(Profile.Id);
+
+        if (result.IsSuccess)
+        {
+            await OnChanged.InvokeAsync();
+        }
+    }
+}

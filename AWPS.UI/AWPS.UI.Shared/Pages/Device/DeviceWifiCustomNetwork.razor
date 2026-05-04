@@ -10,7 +10,7 @@
     private string Ssid { get; set; } = "";
     private string Password { get; set; } = "";
     private bool IsSaveCredentialsFaulted { get; set; }
-    private WifiConnectionResultResponse? WifiConnectionResult { get; set; }
+    private WifiConnectionResultRecord? WifiConnectionResult { get; set; }
 
     private async Task SelectThis()
     {
@@ -25,7 +25,7 @@
         {
             if(await ModalRef.SendPing() is true)
             {
-                WifiConnectionResult = await DeviceInteractor.ConnectToWifi(new WifiCredentialsRequest()
+                WifiConnectionResult = await DeviceInteractor.ConnectToWifi(new WifiCredentialsRecord()
                 {
                     SSID = Ssid,
                     Password = Password
@@ -39,7 +39,7 @@
         }
         catch
         {
-            WifiConnectionResult = new WifiConnectionResultResponse()
+            WifiConnectionResult = new WifiConnectionResultRecord()
             {
                 Connected = false,
                 Message = "Unexpected error"
@@ -54,7 +54,7 @@
         {
             if(await ModalRef.SendPing() is true)
             {
-                await DeviceInteractor.SaveCredentials(new WifiCredentialsRequest()
+                await DeviceInteractor.SaveCredentials(new WifiCredentialsRecord()
                 {
                     SSID = Ssid,
                     Password = Password

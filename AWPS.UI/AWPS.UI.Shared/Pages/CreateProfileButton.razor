@@ -1,0 +1,75 @@
+﻿@inject IApplicationDbInteractor ApplicationDb
+
+<div>
+    @if (!IsCreating)
+    {
+        <button @onclick="StartCreating"
+                class="w-full rounded-2xl bg-green-600 py-3 font-semibold text-white shadow transition hover:bg-green-500">
+            + Create Profile
+        </button>
+    }
+    else
+    {
+        <div class="flex gap-2">
+            <input @bind="ProfileName"
+                   @bind:event="oninput"
+                   @onkeydown="HandleKeyDown"
+                   placeholder="Enter profile name..."
+                   class="flex-1 rounded-xl border border-green-300 px-4 py-2 focus:ring-2 focus:ring-green-400 focus:outline-none" />
+
+            <button @onclick="Create"
+                    class="rounded-xl bg-green-600 px-4 text-white transition hover:bg-green-500">
+                OK
+            </button>
+
+            <button @onclick="Cancel"
+                    class="rounded-xl border border-gray-300 px-4 transition hover:bg-gray-100">
+                Cancel
+            </button>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public EventCallback<DeviceProfileEntity> OnCreated { get; set; }
+
+    private bool IsCreating;
+    private string ProfileName = "";
+
+    private void StartCreating()
+    {
+        IsCreating = true;
+    }
+
+    private void Cancel()
+    {
+        IsCreating = false;
+        ProfileName = "";
+    }
+
+    private async Task HandleKeyDown(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+        {
+            await Create();
+        }
+    }
+
+    private async Task Create()
+    {
+        if (string.IsNullOrWhiteSpace(ProfileName))
+            return;
+
+        var result = await ApplicationDb.CreateDeviceProfile(ProfileName);
+
+        if (result.IsSuccess)
+        {
+            var created = result.Value;
+
+            IsCreating = false;
+            ProfileName = "";
+
+            await OnCreated.InvokeAsync(created);
+        }
+    }
+}

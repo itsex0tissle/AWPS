@@ -3,5 +3,6 @@
 public enum HttpClientKey
 {
     Server,
-    Device
+    Device,
+    IotServer,
 }

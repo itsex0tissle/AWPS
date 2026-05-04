@@ -116,7 +116,8 @@ namespace AWPS.IoT.Works
             WebServer web_server = new(80, HttpProtocol.Http, IPAddress.Parse(WirelessAP.IP), new Type[]
             {
                 typeof(RootWebController),
-                typeof(WifiWebController)
+                typeof(WifiWebController),
+                typeof(AccountWebController)
             });
             NetworkChange.NetworkAPStationChanged += delegate(int station_index, NetworkAPStationEventArgs event_args)
             {

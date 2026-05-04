@@ -1,0 +1,94 @@
+@page "/Account/Register"
+@inject IAuthService AuthService
+@inject NavigationManager NavigationManager
+@code
+{
+    [SupplyParameterFromForm]
+    private AuthRegisterForm FormModel { get; set; } = null!; //Init by OnInitialized()
+
+    protected override void OnInitialized()
+    {
+        FormModel ??= new AuthRegisterForm();
+    }
+}
+@code
+{
+    private string[] Errors { get; set; } = [];
+    private bool IsLoading { get; set; } = false;
+
+    private async Task RegisterAsync()
+    {
+        try
+        {
+            IsLoading = true;
+            Result result = await AuthService.RegisterAsync(FormModel.Email, FormModel.Password);
+            if(result.IsSuccess is true)
+            {
+                NavigationManager.NavigateTo("/Account/Login", forceLoad: true);
+            }
+            else
+            {
+                Errors = result.Errors.ToArray();
+            }
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+}
+
+<LoadScreen>
+    <div class="flex h-full items-center justify-center bg-gray-100 px-4">
+        <div class="w-full max-w-md rounded-2xl bg-white p-8 shadow-lg">
+            <h2 class="mb-6 text-center text-2xl font-bold text-gray-800">Create an account</h2>
+            @if (Errors.Length > 0)
+            {
+                <div class="mb-4 rounded-lg bg-red-100 p-4 text-sm text-red-700">
+                    <ul class="list-inside list-disc">
+                        @foreach (string error in Errors)
+                        {
+                            <li>@error</li>
+                        }
+                    </ul>
+                </div>
+            }
+            <EditForm Model=@FormModel FormName="register" OnValidSubmit=@RegisterAsync>
+                <DataAnnotationsValidator />
+                <div class="mb-4">
+                    <label class="mb-1 block text-sm font-medium text-gray-700">Email</label>
+                    <InputText @bind-Value=@FormModel.Email class="w-full rounded-lg border border-gray-300 px-3 py-2 focus:ring-2 focus:ring-green-500 focus:outline-none" />
+                    <ValidationMessage For=@(() => FormModel.Email) class="text-sm text-red-600 mt-1" />
+                </div>
+                <div class="mb-4">
+                    <label class="mb-1 block text-sm font-medium text-gray-700">Password</label>
+                    <InputText @bind-Value=@FormModel.Password type="password" class="w-full rounded-lg border border-gray-300 px-3 py-2 focus:ring-2 focus:ring-green-500 focus:outline-none" />
+                    <ValidationMessage For=@(() => FormModel.Password) class="text-sm text-red-600 mt-1" />
+                </div>
+                <div class="mb-6">
+                    <label class="mb-1 block text-sm font-medium text-gray-700">Confirm Password</label>
+                    <InputText @bind-Value=@FormModel.ConfirmPassword type="password" class="w-full rounded-lg border border-gray-300 px-3 py-2 focus:ring-2 focus:ring-green-500 focus:outline-none" />
+                    <ValidationMessage For=@(() => FormModel.ConfirmPassword) class="text-sm text-red-600 mt-1" />
+                </div>
+                <button type="submit" disabled=@IsLoading class="flex w-full items-center justify-center gap-2 rounded-lg bg-green-600 px-4 py-2 font-medium text-white transition duration-200 hover:bg-green-700 disabled:cursor-not-allowed disabled:opacity-50">
+                    @if (IsLoading is true)
+                    {
+                        <svg class="h-5 w-5 animate-spin text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+                        </svg>
+                        <span>Registering...</span>
+                    }
+                    else
+                    {
+                        <span>Register</span>
+                    }
+                </button>
+            </EditForm>
+            <p class="mt-6 text-center text-sm text-gray-500">
+                <span>Already have an account?</span>
+                <a href="/Account/Login" class="text-green-600 hover:underline">Sign in</a>
+            </p>
+        </div>
+    </div>
+</LoadScreen>

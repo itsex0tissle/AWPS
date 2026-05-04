@@ -1,12 +1,12 @@
-﻿using AWPS.UI.Shared.Models;
+﻿using System.Text.Json;
+using System.Net.Http.Json;
+using AWPS.UI.Shared.Models;
 using AWPS.UI.Shared.Helpers;
-using ProGaudi.MsgPack.Light;
-using System.Net.Http.Headers;
 using AWPS.UI.Shared.Services;
 
 namespace AWPS.UI.Web.Client.Services;
 
-public sealed class DeviceInteractor([FromKeyedServices(HttpClientKey.Device)] HttpClient httpClient, MsgPackContext context) : IDeviceInteractor
+public sealed class DeviceInteractor([FromKeyedServices(HttpClientKey.Device)] HttpClient httpClient) : IDeviceInteractor
 {
     #region IDeviceInteractor
     public async Task<bool> Ping()
@@ -21,41 +21,32 @@ public sealed class DeviceInteractor([FromKeyedServices(HttpClientKey.Device)] H
             return false;
         }
     }
-    public async Task<WifiStateResponse> GetWifiState()
+    public async Task<WifiStateRecord> GetWifiState()
     {
         using HttpResponseMessage response = await httpClient.GetAsync("/wifi");
         response.EnsureSuccessStatusCode();
-        return MsgPackSerializer.Deserialize<WifiStateResponse>(await response.Content.ReadAsByteArrayAsync(), context);
+        return JsonSerializer.Deserialize<WifiStateRecord>(await response.Content.ReadAsStreamAsync()) ?? throw new Exception("Failed to deserialize the record");
     }
-    public async Task<WifiAvailableNetworkResponse[]> GetAvailableNetworks()
+    public async Task<WifiAvailableNetworkRecord[]> GetAvailableNetworks()
     {
         using HttpResponseMessage response = await httpClient.GetAsync("/wifi/list");
         response.EnsureSuccessStatusCode();
-        return MsgPackSerializer.Deserialize<WifiAvailableNetworkResponse[]>(await response.Content.ReadAsByteArrayAsync(), context);
+        return JsonSerializer.Deserialize<WifiAvailableNetworkRecord[]>(await response.Content.ReadAsStreamAsync()) ?? throw new Exception("Failed to deserialize the record");
     }
-    public async Task<WifiConnectionResultResponse> ConnectToWifi(WifiCredentialsRequest request)
+    public async Task<WifiConnectionResultRecord> ConnectToWifi(WifiCredentialsRecord request)
     {
-        byte[] data = MsgPackSerializer.Serialize(request, context);
-        HttpRequestMessage request_message = new(HttpMethod.Post, "/wifi")
-        {
-            Content = new ByteArrayContent(data)
-        };
-        request_message.Content.Headers.ContentType = new MediaTypeHeaderValue("application/x-msgpack");
-        request_message.Content.Headers.ContentLength = data.Length;
-        using HttpResponseMessage response_message = await httpClient.SendAsync(request_message);
+        using HttpResponseMessage response_message = await httpClient.PostAsJsonAsync("/wifi", request);
         response_message.EnsureSuccessStatusCode();
-        return MsgPackSerializer.Deserialize<WifiConnectionResultResponse>(await response_message.Content.ReadAsByteArrayAsync(), context);
+        return JsonSerializer.Deserialize<WifiConnectionResultRecord>(await response_message.Content.ReadAsStreamAsync()) ?? throw new Exception("Failed to deserialize the record");
     }
-    public async Task SaveCredentials(WifiCredentialsRequest request)
+    public async Task SaveCredentials(WifiCredentialsRecord request)
     {
-        byte[] data = MsgPackSerializer.Serialize(request, context);
-        HttpRequestMessage request_message = new(HttpMethod.Post, "/wifi/save")
-        {
-            Content = new ByteArrayContent(data)
-        };
-        request_message.Content.Headers.ContentType = new MediaTypeHeaderValue("application/x-msgpack");
-        request_message.Content.Headers.ContentLength = data.Length;
-        using HttpResponseMessage response_message = await httpClient.SendAsync(request_message);
+        using HttpResponseMessage response_message = await httpClient.PostAsJsonAsync("/wifi/save", request);
+        response_message.EnsureSuccessStatusCode();
+    }
+    public async Task PostAccount(AccountRecord request)
+    {
+        using HttpResponseMessage response_message = await httpClient.PostAsJsonAsync("/account", request);
         response_message.EnsureSuccessStatusCode();
     }
     #endregion

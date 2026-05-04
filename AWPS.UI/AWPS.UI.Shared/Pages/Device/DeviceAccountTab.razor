@@ -1,0 +1,27 @@
+@inject NavigationManager NavigationManager
+@inject IDeviceInteractor DeviceInteractor
+@code
+{
+    [Parameter] public required string Id { get; set; }
+}
+@code
+{
+    private DeviceWifiNotConnectedModal WifiNotConnectedModalRef { get; set; } = null!; //Init by @ref tag-helper
+
+    private async Task PostAccountHandle()
+    {
+        if(await WifiNotConnectedModalRef.SendPing() is true)
+        {
+            await DeviceInteractor.PostAccount(new AccountRecord()
+            {
+                DeviceProfileId = Id
+            });
+        }
+    }
+}
+
+<DeviceWifiNotConnectedModal @ref=@WifiNotConnectedModalRef />
+<div class="flex h-full flex-col items-center justify-center">
+    <p class="m-15 text-center text-6xl text-gray-600">Account page</p>
+    <LoadableButton Class="m-6" OnClick=@PostAccountHandle>Bind device to the profile</LoadableButton>
+</div>

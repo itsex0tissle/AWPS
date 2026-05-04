@@ -2,8 +2,8 @@
 @code
 {
     private DeviceNotConnectedModal ModalRef { get; set; } = null!; //Init by @ref tag-helper
-    private WifiAvailableNetworkResponse[] Networks { get; set; } = [];
-    private WifiStateResponse? WifiState { get; set; }
+    private WifiAvailableNetworkRecord[] Networks { get; set; } = [];
+    private WifiStateRecord? WifiState { get; set; }
     private int? SelectedItem { get; set; }
     private bool IsLoadingStateFaulted { get; set; }
     private bool IsLoadingNetworksFaulted { get; set; }
@@ -86,7 +86,7 @@
             <div class="text-lg font-semibold">Available Networks</div>
             <ResultableButton OnClick=GetAvailableNetworks IsFaulted=@IsLoadingNetworksFaulted>Scan</ResultableButton>
         </div>
-        @foreach ((int index, WifiAvailableNetworkResponse network) in Networks.Index())
+        @foreach ((int index, WifiAvailableNetworkRecord network) in Networks.Index())
         {
             <DeviceWifiNetworkItem Index=@index
                                    Network=@network
