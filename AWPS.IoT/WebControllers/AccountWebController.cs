@@ -52,5 +52,15 @@ namespace AWPS.IoT.WebControllers
             WebController.SendStatusCode(event_args.Context.Response, HttpStatusCode.OK);
             Logger.LogInfo("'OPTIONS' response on path '/account'");
         }
+
+        [Route("account")]
+        [Method("DELETE")]
+        public static void DeleteAccount(WebServerEventArgs event_args)
+        {
+            Logger.LogInfo("'DELETE' request on path '/account'");
+            AccountFile.Record = new();
+            WebController.SendStatusCode(event_args.Context.Response, HttpStatusCode.OK);
+            Logger.LogInfo("'DELETE' response on path '/account'");
+        }
     }
 }

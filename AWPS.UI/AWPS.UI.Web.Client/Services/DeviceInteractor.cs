@@ -55,5 +55,10 @@ public sealed class DeviceInteractor([FromKeyedServices(HttpClientKey.Device)] H
         using HttpResponseMessage response_message = await httpClient.PostAsJsonAsync("/account", request);
         response_message.EnsureSuccessStatusCode();
     }
+    public async Task DeleteAccount()
+    {
+        using HttpResponseMessage response = await httpClient.DeleteAsync("/account");
+        response.EnsureSuccessStatusCode();
+    }
     #endregion
 }

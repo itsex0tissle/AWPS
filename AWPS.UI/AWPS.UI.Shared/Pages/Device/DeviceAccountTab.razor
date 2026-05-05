@@ -1,4 +1,4 @@
-@inject NavigationManager NavigationManager
+﻿@inject NavigationManager NavigationManager
 @inject IDeviceInteractor DeviceInteractor
 @code
 {
@@ -17,6 +17,14 @@
     private DeviceWifiNotConnectedModal WifiNotConnectedModalRef { get; set; } = null!; //Init by @ref tag-helper
     private AccountRecord? AccountRecord { get; set; }
 
+    private async Task DeleteAccountHandle()
+    {
+        if(await WifiNotConnectedModalRef.SendPing() is true)
+        {
+            await DeviceInteractor.DeleteAccount();
+            await GetAccountAsync();
+        }
+    }
     private async Task PostAccountHandle()
     {
         if(await WifiNotConnectedModalRef.SendPing() is true)
@@ -56,5 +64,8 @@
     {
         <p class="m-3 text-center text-xl text-gray-600">No information about binded account in the device</p>
     }
-    <LoadableButton Class="m-6" OnClick=@PostAccountHandle>Bind device to the profile</LoadableButton>
+    <div class="m-6 flex flex-row gap-2">
+        <LoadableButton OnClick=@PostAccountHandle>Bind</LoadableButton>
+        <LoadableButton OnClick=@DeleteAccountHandle>Clear</LoadableButton>
+    </div>
 </div>

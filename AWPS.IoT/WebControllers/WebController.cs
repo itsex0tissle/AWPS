@@ -9,7 +9,7 @@ namespace AWPS.IoT.WebControllers
     {
         public const string AllowOrigin = "*";
         public const string AllowHeaders = "*";
-        public const string AllowMethods = "GET, POST, OPTIONS";
+        public const string AllowMethods = "GET, POST, OPTIONS, DELETE";
 
         public static void SetHeaders(HttpListenerResponse response)
         {

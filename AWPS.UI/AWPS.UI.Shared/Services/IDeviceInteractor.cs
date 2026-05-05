@@ -11,4 +11,5 @@ public interface IDeviceInteractor
     public abstract Task SaveCredentials(WifiCredentialsRecord request);
     public abstract Task<AccountRecord> GetAccount();
     public abstract Task PostAccount(AccountRecord request);
+    public abstract Task DeleteAccount();
 }
