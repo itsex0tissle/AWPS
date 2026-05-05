@@ -5,12 +5,14 @@ using AWPS.IoT.MsgPack;
 using System.Threading;
 using AWPS.IoT.Services;
 using Iot.Device.Button;
+using System.Device.Gpio;
 using System.Diagnostics;
 using nanoFramework.Json;
 using Iot.Device.DhcpServer;
 using AWPS.IoT.WebControllers;
 using nanoFramework.WebServer;
 using nanoFramework.Networking;
+using nanoFramework.Hardware.Esp32;
 using nanoFramework.Runtime.Native;
 using System.Net.NetworkInformation;
 
@@ -55,9 +57,13 @@ namespace AWPS.IoT.Works
         {
             JsonSerializerOptions.Default.PropertyNameCaseInsensitive = true;
         }
-        private static void EnableButton()
+        private static void EnableButtonIfManuallyRestarted()
         {
-            GpioButton button = new(21);
+            if(Sleep.GetWakeupCause() is Sleep.WakeupCause.Timer)
+            {
+                return;
+            }
+            GpioButton button = new(19);
             button.Press += static delegate(object sender, EventArgs event_args)
             {
                 if(WirelessAP.Enabled is false)
@@ -69,7 +75,27 @@ namespace AWPS.IoT.Works
                     WirelessAP.Disable();
                 }
             };
-            Logger.LogInfo("Button enabled");
+            GpioController controller = new();
+            GpioPin indicator = controller.OpenPin(21, PinMode.Output);
+            if(WirelessAP.Enabled is true)
+            {
+                HighResTimer timer = new();
+                timer.OnHighResTimerExpired += delegate(HighResTimer sender, object event_args)
+                {
+                    indicator.Toggle();
+                };
+                timer.StartOnePeriodic(500_000);
+                Logger.LogInfo("Button enabled");
+            }
+            else
+            {
+                indicator.Write(PinValue.High);
+                Logger.LogInfo("Button enabled for 10s");
+                Thread.Sleep(10000);
+                button.Dispose();
+                indicator.Dispose();
+                Logger.LogInfo("Button disabled");
+            }
         }
         private static void StartDhcpServerIfWirelessAPEnabled()
         {
@@ -181,7 +207,7 @@ namespace AWPS.IoT.Works
             {
                 AddDebugLogs();
                 GlobalSetup();
-                EnableButton();
+                EnableButtonIfManuallyRestarted();
                 MsgPackContextConfigurator.Setup();
                 StartDhcpServerIfWirelessAPEnabled();
                 EnableTimeoutForWirelessAP();
