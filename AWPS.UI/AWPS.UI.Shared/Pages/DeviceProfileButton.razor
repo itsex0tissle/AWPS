@@ -7,7 +7,7 @@
     {
         <!-- View mode -->
         <button @onclick="OpenProfile"
-                class="flex-1 truncate text-left font-medium text-green-800">
+                class="flex-1 cursor-pointer truncate text-left font-medium text-green-800">
             @Profile.Name
         </button>
 
@@ -15,19 +15,19 @@
 
             <!-- Rename -->
             <button @onclick="StartEdit"
-                    class="rounded-lg p-2 transition hover:bg-green-100">
+                    class="cursor-pointer rounded-lg p-2 transition hover:bg-green-100">
                 ✏️
             </button>
 
             <!-- Delete -->
             <button @onclick="Delete"
-                    class="rounded-lg p-2 text-red-600 transition hover:bg-red-100">
+                    class="cursor-pointer rounded-lg p-2 text-red-600 transition hover:bg-red-100">
                 🗑️
             </button>
 
             <!-- Arrow -->
             <button @onclick="OpenProfile"
-                    class="rounded-lg p-2 transition hover:bg-green-100">
+                    class="cursor-pointer rounded-lg p-2 transition hover:bg-green-100">
                 <svg xmlns="http://www.w3.org/2000/svg"
                      class="h-5 w-5 text-green-500"
                      fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -49,12 +49,12 @@
         <div class="ml-4 flex items-center gap-2">
 
             <button @onclick="Save"
-                    class="rounded-lg bg-green-600 px-3 py-1 text-white transition hover:bg-green-500">
+                    class="cursor-pointer rounded-lg bg-green-600 px-3 py-1 text-white transition hover:bg-green-500">
                 OK
             </button>
 
             <button @onclick="Cancel"
-                    class="rounded-lg border px-3 py-1 transition hover:bg-gray-100">
+                    class="cursor-pointer rounded-lg border px-3 py-1 transition hover:bg-gray-100">
                 Cancel
             </button>
 

@@ -43,6 +43,10 @@ public sealed class MauiAuthenticationStateProvider([FromKeyedServices(HttpClien
         }
     }
     private Task<AuthenticationState> CurrentAuthState { get; set; } = MauiAuthenticationStateProvider.DefaultAuthState;
+    public string? Email
+    {
+        get => AccessToken?.Email;
+    }
 
     private async Task<AccessToken?> RefreshTokenAsync(AccessToken token)
     {

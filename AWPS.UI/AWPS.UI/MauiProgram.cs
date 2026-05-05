@@ -42,7 +42,6 @@ public static class MauiProgram
         builder.Services.AddScoped<IServerInteractor, ServerInteractor>();
         builder.Services.AddScoped<IDeviceInteractor, DeviceInteractor>();
         builder.Services.AddScoped<IApplicationDbInteractor, ApplicationDbInteractor>();
-        builder.Services.AddSingleton<IDeviceProfileDataContainer, DeviceProfileDataContainer>();
 #if DEBUG
         builder.Services.AddBlazorWebViewDeveloperTools();
         builder.Logging.AddDebug();

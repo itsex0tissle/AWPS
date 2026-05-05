@@ -1,12 +1,12 @@
 using ApexCharts;
 using AWPS.UI.Web;
 using AWPS.UI.Web.Services;
+using AWPS.UI.Shared.Helpers;
 using AWPS.UI.Shared.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Identity;
 using AWPS.Core.Infrastructure.Data;
 using Microsoft.AspNetCore.Components.Authorization;
-using AWPS.UI.Shared.Helpers;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents().AddInteractiveServerComponents().AddInteractiveWebAssemblyComponents();
@@ -32,6 +32,10 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddKeyedScoped(HttpClientKey.IotServer, (provider, key) => new HttpClient()
 {
     BaseAddress = new Uri("https://localhost:7022")
+});
+builder.Services.AddKeyedScoped(HttpClientKey.Server, (provider, key) => new HttpClient()
+{
+    BaseAddress = new Uri("https://localhost:7037")
 });
 
 WebApplication app = builder.Build();
@@ -66,7 +70,7 @@ app.MapGet("/ping", () =>
 }).RequireAuthorization();
 
 RouteGroupBuilder appDbGroup = app.MapGroup("/app-db").RequireAuthorization();
-appDbGroup.MapGet("/current-user", GetCurrentUser).WithName("GetCurrentUser");
+appDbGroup.MapGet("/user-email", GetCurrentUser).WithName("GetCurrentUserEmail");
 appDbGroup.MapDelete("/delete-current-user", DeleteCurrentUser).WithName("DeleteCurrentUser");
 appDbGroup.MapGet("/device-profiles", GetDeviceProfiles).WithName("GetDeviceProfiles");
 appDbGroup.MapGet("/device-profile/{device_profile_id}", GetDeviceProfile).WithName("GetDeviceProfile");
@@ -79,7 +83,7 @@ app.Run();
 
 async Task<IResult> GetCurrentUser([FromServices] IApplicationDbInteractor interactor)
 {
-    var result = await interactor.GetCurrentUser();
+    var result = await interactor.GetCurrentUserEmail();
     return result.IsSuccess ? Results.Ok(result.Value) : MapError(result);
 }
 async Task<IResult> DeleteCurrentUser([FromServices] IApplicationDbInteractor interactor)

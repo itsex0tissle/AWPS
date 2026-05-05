@@ -3,15 +3,12 @@
 @inject NavigationManager NavigationManager
 @inject IJSRuntime JS
 
-<!-- NAVBAR -->
 <div class="fixed top-0 left-0 z-50 w-full bg-green-600 text-white shadow-md">
     <div class="px-4 py-3">
         <div class="flex items-center gap-6">
-
-            <!-- Dropdown -->
             <div class="relative" @ref="DropdownRef">
                 <button @onclick="ToggleDropdown"
-                        class="flex items-center gap-2 rounded-xl bg-green-500 px-4 py-2 text-sm font-medium shadow transition hover:bg-green-400">
+                        class="flex cursor-pointer items-center gap-2 rounded-xl bg-green-500 px-4 py-2 text-sm font-medium shadow transition hover:bg-green-400">
                     <span>@UserEmail</span>
                     <svg xmlns="http://www.w3.org/2000/svg"
                          class="h-4 w-4 transition-transform @(IsDropdownOpen ? "rotate-180" : "")"
@@ -20,10 +17,14 @@
                               stroke-width="2" d="M19 9l-7 7-7-7" />
                     </svg>
                 </button>
-
                 <div class="@DropdownClasses">
-                    <LogoutButton />
-
+                    <button @onclick="LogoutAsync" 
+                        class="flex w-full cursor-pointer items-center gap-2 px-4 py-2 text-left text-sm text-gray-800 transition hover:bg-green-100">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7" />
+                        </svg>
+                        Logout
+                    </button>
                     <button @onclick="DeleteUserAsync"
                             class="flex w-full cursor-pointer items-center gap-2 px-4 py-2 text-left text-sm text-red-600 transition hover:bg-red-100">
                         <svg xmlns="http://www.w3.org/2000/svg"
@@ -36,24 +37,18 @@
                     </button>
                 </div>
             </div>
-
-            <!-- Home -->
             <a href="/" class="text-sm font-semibold text-white transition hover:text-green-200">
                 Home
             </a>
-
         </div>
     </div>
 </div>
-
-<!-- CONTENT -->
-<div class="pt-16">
-    @ChildContent
-</div>
+<div class="pt-16">@ChildContent</div>
 
 @code
 {
-    [Parameter] public RenderFragment? ChildContent { get; set; }
+    [Inject(Key = HttpClientKey.Server)] public HttpClient HttpClient { get; set; } = null!; //Init be InjectAttribute
+    [Parameter] public RenderFragment? ChildContent { get; set; } 
 
     private string? UserEmail;
     private bool IsDropdownOpen;
@@ -69,10 +64,10 @@
 
     protected override async Task OnInitializedAsync()
     {
-        var result = await ApplicationDb.GetCurrentUser();
+        var result = await ApplicationDb.GetCurrentUserEmail();
         if (result.IsSuccess)
         {
-            UserEmail = result.Value.Email;
+            UserEmail = result;
         }
     }
 
@@ -99,8 +94,27 @@
 
     private async Task LogoutAsync()
     {
-        var result = await AuthService.LogoutAsync();
-        if (result.IsSuccess)
+        Result result = Result.Error("Failed to connect to the server");
+        if(base.RendererInfo.Name is not Renderer.Server)
+        {
+            result = await AuthService.LogoutAsync();
+        }
+        else
+        {
+            try
+            {
+                using HttpResponseMessage response = await HttpClient.PostAsync("/identity/logout", null);
+                if(response.IsSuccessStatusCode is true)
+                {
+                    result = Result.Success();
+                }
+            }
+            catch
+            {
+                result = Result.CriticalError();
+            }
+        }
+        if(result.IsSuccess)
         {
             NavigationManager.NavigateTo("/Account/Login", true);
         }

@@ -21,5 +21,4 @@ builder.Services.AddScoped<IServerInteractor, ServerInteractor>();
 builder.Services.AddScoped<IDeviceInteractor, DeviceInteractor>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IApplicationDbInteractor, ApplicationDbInteractor>();
-builder.Services.AddSingleton<IDeviceProfileDataContainer, DeviceProfileDataContainer>();
 await builder.Build().RunAsync();

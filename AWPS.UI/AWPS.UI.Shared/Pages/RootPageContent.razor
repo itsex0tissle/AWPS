@@ -1,11 +1,10 @@
 ﻿@inject IApplicationDbInteractor ApplicationDb
-@inject NavigationManager NavigationManager
 
 <LoadScreen>  
     <NavBar>
         <div class="space-y-4 p-6">
 
-            <CreateProfileButton OnCreated="OnProfileCreated" />
+            <CreateProfileButton />
 
             @if (Profiles is null)
             {
@@ -44,11 +43,5 @@
         {
             Profiles = result.Value;
         }
-    }
-
-    private async Task OnProfileCreated(DeviceProfileEntity profile)
-    {
-        // автоперехід
-        NavigationManager.NavigateTo($"/Profile/{profile.Id}");
     }
 }

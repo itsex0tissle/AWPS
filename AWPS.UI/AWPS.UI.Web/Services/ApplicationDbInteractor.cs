@@ -1,43 +1,37 @@
 using Ardalis.Result;
-using System.Security.Claims;
 using AWPS.UI.Shared.Services;
 using AWPS.Core.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity;
 
 namespace AWPS.UI.Web.Services;
 
-public sealed class ApplicationDbInteractor(ApplicationDbContext dbContext, IHttpContextAccessor httpContextAccessor, IotServerInteractor iotServerInteractor) : IApplicationDbInteractor
+public sealed class ApplicationDbInteractor(
+    ApplicationDbContext dbContext,
+    IotServerInteractor iotServerInteractor,
+    IHttpContextAccessor httpContextAccessor,
+    UserManager<ApplicationUserEntity> userManager
+) : IApplicationDbInteractor
 {
     #region Instance
     private string? GetCurrentUserId()
     {
-        return httpContextAccessor.HttpContext?.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if(httpContextAccessor.HttpContext is not HttpContext httpContext)
+        {
+            return null;
+        }
+        return userManager.GetUserId(httpContext.User);
     }
     #endregion
 
     #region IApplicationDbInteractor
-    public async Task<Result<ApplicationUserEntity>> GetCurrentUser()
+    public async Task<Result<string>> GetCurrentUserEmail()
     {
-        try
+        if(httpContextAccessor.HttpContext is not HttpContext httpContext)
         {
-            string? userId = GetCurrentUserId();
-            if (userId is null)
-            {
-                return Result.Unauthorized();
-            }
-
-            ApplicationUserEntity? user = await dbContext.Users.FirstOrDefaultAsync(u => u.Id == userId);
-            if (user is null)
-            {
-                return Result.NotFound();
-            }
-
-            return Result.Success(user);
+            return Result.Unauthorized();
         }
-        catch (Exception exc)
-        {
-            return Result.CriticalError(exc.Message);
-        }
+        return Result.Success(userManager.GetUserName(httpContext.User) ?? "");
     }
     public async Task<Result> DeleteCurrentUser()
     {
@@ -130,7 +124,11 @@ public sealed class ApplicationDbInteractor(ApplicationDbContext dbContext, IHtt
 
             dbContext.DeviceProfiles.Add(profile);
             await dbContext.SaveChangesAsync();
-            await iotServerInteractor.StartTrackingDevice(profile.Id);
+            try
+            {
+                await iotServerInteractor.StartTrackingDevice(profile.Id);
+            }
+            catch { }
 
             return Result.Success(profile);
         }
@@ -188,7 +186,11 @@ public sealed class ApplicationDbInteractor(ApplicationDbContext dbContext, IHtt
                 return Result.NotFound();
             }
 
-            await iotServerInteractor.StopTrackingDevice(device_profile_id);
+            try
+            {
+                await iotServerInteractor.StopTrackingDevice(device_profile_id);
+            }
+            catch { }
             dbContext.DeviceProfiles.Remove(profile);
             await dbContext.SaveChangesAsync();
 

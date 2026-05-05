@@ -7,7 +7,10 @@ using AWPS.Core.Infrastructure.Data;
 
 namespace AWPS.UI.Services;
 
-public sealed class ApplicationDbInteractor([FromKeyedServices(HttpClientKey.Server)] HttpClient httpClient) : IApplicationDbInteractor
+public sealed class ApplicationDbInteractor(
+    [FromKeyedServices(HttpClientKey.Server)] HttpClient httpClient, 
+    MauiAuthenticationStateProvider masp
+) : IApplicationDbInteractor
 {
     #region Static
     private static Result MapErrorResponse(HttpResponseMessage response)
@@ -24,30 +27,9 @@ public sealed class ApplicationDbInteractor([FromKeyedServices(HttpClientKey.Ser
     #endregion
 
     #region IApplicationDbInteractor
-    public async Task<Result<ApplicationUserEntity>> GetCurrentUser()
+    public Task<Result<string>> GetCurrentUserEmail()
     {
-        try
-        {
-            using HttpResponseMessage response = await httpClient.GetAsync("/app-db/current-user");
-            if (response.IsSuccessStatusCode)
-            {
-                if (JsonSerializer.Deserialize<ApplicationUserEntity>(await response.Content.ReadAsStringAsync()) is ApplicationUserEntity user)
-                {
-                    return Result.Success(user);
-                }
-                return Result.CriticalError("Failed to deserialize user response.");
-            }
-
-            return MapErrorResponse(response);
-        }
-        catch (HttpRequestException)
-        {
-            return Result.Error("Failed to connect to the server.");
-        }
-        catch (Exception exc)
-        {
-            return Result.CriticalError(exc.Message);
-        }
+        return Task.FromResult(Result.Success(masp.Email ?? ""));
     }
     public async Task<Result> DeleteCurrentUser()
     {
@@ -77,9 +59,9 @@ public sealed class ApplicationDbInteractor([FromKeyedServices(HttpClientKey.Ser
             using HttpResponseMessage response = await httpClient.GetAsync("/app-db/device-profiles");
             if (response.IsSuccessStatusCode)
             {
-                if (JsonSerializer.Deserialize<DeviceProfileEntity[]>(await response.Content.ReadAsStringAsync()) is DeviceProfileEntity[] profiles)
+                if (JsonSerializer.Deserialize<Result<DeviceProfileEntity[]>>(await response.Content.ReadAsStringAsync()) is Result<DeviceProfileEntity[]> result)
                 {
-                    return Result.Success(profiles);
+                    return result;
                 }
                 return Result.CriticalError("Failed to deserialize device profiles response.");
             }
@@ -102,9 +84,9 @@ public sealed class ApplicationDbInteractor([FromKeyedServices(HttpClientKey.Ser
             using HttpResponseMessage response = await httpClient.GetAsync($"/app-db/device-profile/{device_profile_id}");
             if (response.IsSuccessStatusCode)
             {
-                if (JsonSerializer.Deserialize<DeviceProfileEntity>(await response.Content.ReadAsStringAsync()) is DeviceProfileEntity profile)
+                if (JsonSerializer.Deserialize<Result<DeviceProfileEntity>>(await response.Content.ReadAsStringAsync()) is Result<DeviceProfileEntity> result)
                 {
-                    return Result.Success(profile);
+                    return result;
                 }
                 return Result.CriticalError("Failed to deserialize device profile response.");
             }
@@ -127,9 +109,9 @@ public sealed class ApplicationDbInteractor([FromKeyedServices(HttpClientKey.Ser
             using HttpResponseMessage response = await httpClient.PostAsJsonAsync("/app-db/device-profile", name);
             if (response.IsSuccessStatusCode)
             {
-                if (JsonSerializer.Deserialize<DeviceProfileEntity>(await response.Content.ReadAsStringAsync()) is DeviceProfileEntity profile)
+                if (JsonSerializer.Deserialize<Result<DeviceProfileEntity>>(await response.Content.ReadAsStringAsync()) is Result<DeviceProfileEntity> result)
                 {
-                    return Result.Success(profile);
+                    return result;
                 }
                 return Result.CriticalError("Failed to deserialize created device profile response.");
             }
@@ -152,9 +134,9 @@ public sealed class ApplicationDbInteractor([FromKeyedServices(HttpClientKey.Ser
             using HttpResponseMessage response = await httpClient.PutAsJsonAsync("/app-db/device-profile", profile);
             if (response.IsSuccessStatusCode)
             {
-                if (JsonSerializer.Deserialize<DeviceProfileEntity>(await response.Content.ReadAsStringAsync()) is DeviceProfileEntity updatedProfile)
+                if (JsonSerializer.Deserialize<Result<DeviceProfileEntity>>(await response.Content.ReadAsStringAsync()) is Result<DeviceProfileEntity> result)
                 {
-                    return Result.Success(updatedProfile);
+                    return result;
                 }
                 return Result.CriticalError("Failed to deserialize updated device profile response.");
             }
@@ -198,9 +180,9 @@ public sealed class ApplicationDbInteractor([FromKeyedServices(HttpClientKey.Ser
             using HttpResponseMessage response = await httpClient.GetAsync($"/app-db/telemetry/{device_profile_id}");
             if (response.IsSuccessStatusCode)
             {
-                if (JsonSerializer.Deserialize<TelemetryEntity[]>(await response.Content.ReadAsStringAsync()) is TelemetryEntity[] telemetry)
+                if (JsonSerializer.Deserialize<Result<TelemetryEntity[]>>(await response.Content.ReadAsStringAsync()) is Result<TelemetryEntity[]> result)
                 {
-                    return Result.Success(telemetry);
+                    return result;
                 }
                 return Result.CriticalError("Failed to deserialize telemetry response.");
             }

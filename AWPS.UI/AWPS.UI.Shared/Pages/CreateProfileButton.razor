@@ -1,10 +1,11 @@
 ﻿@inject IApplicationDbInteractor ApplicationDb
+@inject NavigationManager NavigationManager
 
 <div>
     @if (!IsCreating)
     {
         <button @onclick="StartCreating"
-                class="w-full rounded-2xl bg-green-600 py-3 font-semibold text-white shadow transition hover:bg-green-500">
+                class="w-full cursor-pointer rounded-2xl bg-green-600 py-3 font-semibold text-white shadow transition hover:bg-green-500">
             + Create Profile
         </button>
     }
@@ -18,21 +19,20 @@
                    class="flex-1 rounded-xl border border-green-300 px-4 py-2 focus:ring-2 focus:ring-green-400 focus:outline-none" />
 
             <button @onclick="Create"
-                    class="rounded-xl bg-green-600 px-4 text-white transition hover:bg-green-500">
+                    class="cursor-pointer rounded-xl bg-green-600 px-4 text-white transition hover:bg-green-500">
                 OK
             </button>
 
             <button @onclick="Cancel"
-                    class="rounded-xl border border-gray-300 px-4 transition hover:bg-gray-100">
+                    class="cursor-pointer rounded-xl border border-gray-300 px-4 transition hover:bg-gray-100">
                 Cancel
             </button>
         </div>
     }
 </div>
 
-@code {
-    [Parameter] public EventCallback<DeviceProfileEntity> OnCreated { get; set; }
-
+@code
+{
     private bool IsCreating;
     private string ProfileName = "";
 
@@ -61,7 +61,6 @@
             return;
 
         var result = await ApplicationDb.CreateDeviceProfile(ProfileName);
-
         if (result.IsSuccess)
         {
             var created = result.Value;
@@ -69,7 +68,7 @@
             IsCreating = false;
             ProfileName = "";
 
-            await OnCreated.InvokeAsync(created);
+            NavigationManager.NavigateTo($"/Profile/{created.Id}");
         }
     }
 }

@@ -45,12 +45,8 @@
     private async Task ClearData()
     {
         await ApplicationDb.ClearTelemetry(DeviceProfileId);
-        Data = [];
-        if (Chart is not null)
-        {
-            await Chart.UpdateSeriesAsync();
-        }
-        await InvokeAsync(StateHasChanged);
+        await OnParametersSetAsync();
+        SelectedMetric = SelectedMetric;
     }
     private object GetXText(TelemetryEntity x)
     {
@@ -60,21 +56,21 @@
 
 <LoadScreen>
     <NavBar>       
-        <div class="p-6">
+        <div class="flex h-full flex-col p-6">
             <div class="mb-6 flex items-center justify-between">
-                <h1 class="text-3xl font-bold text-gray-800">Sensor Measurements</h1>
+                <h1 class="text-3xl font-bold text-gray-800">Telemetry</h1>
                 <a href=@($"/Device/{DeviceProfileId}") class="rounded-lg bg-green-600 px-4 py-2 text-white shadow hover:bg-green-700">Configure Device</a>
             </div>
-            <div class="rounded-xl bg-white p-6 shadow">
+            <div class="flex-1 overflow-y-auto rounded-xl bg-white p-6 shadow">
                 <div class="mb-4">
                     <label class="mb-1 block text-sm font-medium text-gray-600">Select parameter</label>
-                    <select @bind="SelectedMetric" class="w-64 rounded-lg border px-3 py-2">
-                        <option value="Light">Light</option>
+                    <select @bind="SelectedMetric" class="w-64 cursor-pointer rounded-lg border px-3 py-2">
+                        <option value="Light" >Light</option>
                         <option value="Moisture">Soil Moisture</option>
                         <option value="Humidity">Air Humidity</option>
                         <option value="Temperature">Temperature</option>
                     </select>
-                    <button @onclick="ClearData" class="h-10 rounded-lg bg-red-600 px-4 text-white shadow hover:bg-red-700">Clear Data</button>
+                    <button @onclick="ClearData" class="h-10 cursor-pointer rounded-lg bg-red-600 px-4 text-white shadow hover:bg-red-700">Clear Data</button>
                 </div>
                 <ApexChart TItem="TelemetryEntity" Options="ChartOptions" @ref="Chart">
                     <ApexPointSeries TItem="TelemetryEntity" Items="Data" Name="@SelectedMetric" XValue=@GetXText YValue="GetYValue" />

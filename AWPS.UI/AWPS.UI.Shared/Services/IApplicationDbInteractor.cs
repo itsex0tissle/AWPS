@@ -5,7 +5,7 @@ namespace AWPS.UI.Shared.Services;
 
 public interface IApplicationDbInteractor
 {
-    public abstract Task<Result<ApplicationUserEntity>> GetCurrentUser();
+    public abstract Task<Result<string>> GetCurrentUserEmail();
     public abstract Task<Result> DeleteCurrentUser();
     public abstract Task<Result<DeviceProfileEntity[]>> GetDeviceProfiles();
     public abstract Task<Result<DeviceProfileEntity>> GetDeviceProfile(string device_profile_id);
