@@ -44,6 +44,12 @@ public sealed class DeviceInteractor([FromKeyedServices(HttpClientKey.Device)] H
         using HttpResponseMessage response_message = await httpClient.PostAsJsonAsync("/wifi/save", request);
         response_message.EnsureSuccessStatusCode();
     }
+    public async Task<AccountRecord> GetAccount()
+    {
+        using HttpResponseMessage response = await httpClient.GetAsync("/account");
+        response.EnsureSuccessStatusCode();
+        return JsonSerializer.Deserialize<AccountRecord>(await response.Content.ReadAsStreamAsync()) ?? throw new Exception("Failed to deserialize the record");
+    }
     public async Task PostAccount(AccountRecord request)
     {
         using HttpResponseMessage response_message = await httpClient.PostAsJsonAsync("/account", request);

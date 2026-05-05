@@ -9,5 +9,6 @@ public interface IDeviceInteractor
     public abstract Task<WifiAvailableNetworkRecord[]> GetAvailableNetworks();
     public abstract Task<WifiConnectionResultRecord> ConnectToWifi(WifiCredentialsRecord request);
     public abstract Task SaveCredentials(WifiCredentialsRecord request);
+    public abstract Task<AccountRecord> GetAccount();
     public abstract Task PostAccount(AccountRecord request);
 }

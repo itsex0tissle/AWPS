@@ -3,10 +3,19 @@
 @code
 {
     [Parameter] public required string Id { get; set; }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if(firstRender is true)
+        {            
+            await GetAccountAsync();            
+        }
+    }
 }
 @code
 {
     private DeviceWifiNotConnectedModal WifiNotConnectedModalRef { get; set; } = null!; //Init by @ref tag-helper
+    private AccountRecord? AccountRecord { get; set; }
 
     private async Task PostAccountHandle()
     {
@@ -16,12 +25,36 @@
             {
                 DeviceProfileId = Id
             });
+            await GetAccountAsync();
         }
+    }
+    private async Task GetAccountAsync()
+    {
+        if(await WifiNotConnectedModalRef.SendPing() is true)
+        {
+            AccountRecord = await DeviceInteractor.GetAccount();
+        }
+        _ = InvokeAsync(StateHasChanged);
     }
 }
 
 <DeviceWifiNotConnectedModal @ref=@WifiNotConnectedModalRef />
 <div class="flex h-full flex-col items-center justify-center">
     <p class="m-15 text-center text-6xl text-gray-600">Account page</p>
+    @if(AccountRecord is not null)
+    {
+        if(AccountRecord.DeviceProfileId is null)
+        {
+            <p class="m-3 text-center text-xl text-gray-600">No account binded to the device</p>
+        }
+        else
+        {
+            <p class="m-3 text-center text-xl text-gray-600">Device profile: @AccountRecord.DeviceProfileId</p>
+        }
+    }
+    else
+    {
+        <p class="m-3 text-center text-xl text-gray-600">No information about binded account in the device</p>
+    }
     <LoadableButton Class="m-6" OnClick=@PostAccountHandle>Bind device to the profile</LoadableButton>
 </div>
