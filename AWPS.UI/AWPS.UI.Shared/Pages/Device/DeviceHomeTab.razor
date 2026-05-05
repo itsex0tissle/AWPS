@@ -1,13 +1,17 @@
 ﻿@inject NavigationManager NavigationManager
 @code
 {
+    [Parameter] public required string Id { get; set; }
+}
+@code
+{
     private DeviceWifiNotConnectedModal WifiNotConnectedModalRef { get; set; } = null!; //Init by @ref tag-helper
 
     private async Task BackToProfileHandler()
     {
         if(await WifiNotConnectedModalRef.SendPing() is true)
         {
-            NavigationManager.NavigateTo("/");
+            NavigationManager.NavigateTo($"/Profile/{Id}");
         }
     }
 }
