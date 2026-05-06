@@ -25,9 +25,9 @@ namespace AWPS.IoT
             {
                 if(DeviceStateFile.Record.WareringInProcess is true)
                 {
-                    Helper.EnterDeepSleep(TimeSpan.FromMinutes(1));
+                    Helper.EnterDeepSleep(TimeSpan.FromMinutes(2));
                 }
-                Helper.EnterDeepSleep(TimeSpan.FromSeconds(30));
+                Helper.EnterDeepSleep(TimeSpan.FromMinutes(1));
             }
             Logger.LogInfo($"{nameof(Program)}.{nameof(Main)} finished");
         }

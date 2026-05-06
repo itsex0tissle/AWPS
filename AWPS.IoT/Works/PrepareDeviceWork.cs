@@ -63,9 +63,14 @@ namespace AWPS.IoT.Works
             {
                 return;
             }
+            GpioController controller = new();
+            GpioPin indicator = controller.OpenPin(21, PinMode.Output);
+            HighResTimer timer = new();
             GpioButton button = new(19);
-            button.Press += static delegate(object sender, EventArgs event_args)
+            button.Press += delegate(object sender, EventArgs event_args)
             {
+                timer.Stop();
+                indicator.Write(PinValue.Low);
                 if(WirelessAP.Enabled is false)
                 {
                     WirelessAP.Enable();
@@ -75,11 +80,8 @@ namespace AWPS.IoT.Works
                     WirelessAP.Disable();
                 }
             };
-            GpioController controller = new();
-            GpioPin indicator = controller.OpenPin(21, PinMode.Output);
             if(WirelessAP.Enabled is true)
             {
-                HighResTimer timer = new();
                 timer.OnHighResTimerExpired += delegate(HighResTimer sender, object event_args)
                 {
                     indicator.Toggle();
