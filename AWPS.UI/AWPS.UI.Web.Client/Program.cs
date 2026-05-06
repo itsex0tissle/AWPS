@@ -21,4 +21,5 @@ builder.Services.AddScoped<IServerInteractor, ServerInteractor>();
 builder.Services.AddScoped<IDeviceInteractor, DeviceInteractor>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IApplicationDbInteractor, ApplicationDbInteractor>();
+builder.Services.AddScoped(provider => new TelemetryHubClientService("https://localhost:7022/telemetry-hub"));
 await builder.Build().RunAsync();

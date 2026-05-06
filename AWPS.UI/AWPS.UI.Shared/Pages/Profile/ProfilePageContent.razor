@@ -1,26 +1,43 @@
-﻿@inject IApplicationDbInteractor ApplicationDb
+﻿@using AWPS.UI.Shared.Services
+@inject IApplicationDbInteractor ApplicationDb
+@inject TelemetryHubClientService TelemetryHubClient
+@implements IAsyncDisposable
 @code
 {
     [Parameter] public required string DeviceProfileId { get; set; }
 
-    protected override async Task OnParametersSetAsync()
-    {
-        Result<TelemetryEntity[]> result = await ApplicationDb.GetTelemetry(DeviceProfileId);
-        if (result.IsSuccess)
+    protected override async Task OnInitializedAsync()
+    {       
+        if(TelemetryHubClient.ConnectionState != Microsoft.AspNetCore.SignalR.Client.HubConnectionState.Connected)
         {
-            Data = result.Value;
+            if(Chart != null && _previousDeviceProfileId != null && _previousDeviceProfileId != DeviceProfileId)
+            {
+                await TelemetryHubClient.UnsubscribeFromDeviceAsync(_previousDeviceProfileId);
+            }
+            await TelemetryHubClient.ConnectAsync(OnTelemetryUpdatedAsync);
+            await TelemetryHubClient.SubscribeToDeviceAsync(DeviceProfileId);
+            _previousDeviceProfileId = DeviceProfileId;
         }
-        if (Chart != null)
-        {
-            await Chart.UpdateSeriesAsync();
-        }
-        SelectedMetric = SelectedMetric;
+        await UpdateChartAsync();
     }
 }
 @code
 {
-    private TelemetryEntity[] Data = [];
-    private ApexChart<TelemetryEntity>? Chart;
+    private string? _previousDeviceProfileId;
+    private TelemetryEntity[] Data { get; set; } = [];
+    private ApexChart<TelemetryEntity>? Chart { get; set; }
+    private ApexChartOptions<TelemetryEntity> ChartOptions { get; set; } = new()
+    {
+        Chart = new Chart
+        {
+            Type = ChartType.Line,
+            Height = 400
+        },
+        Stroke = new Stroke
+        {
+            Curve = new CurveSelections(Curve.Smooth)
+        }
+    };
     private string SelectedMetric
     {
         get => field;
@@ -30,7 +47,6 @@
             _ = Chart?.UpdateSeriesAsync();
         }
     } = "Light";
-    private ApexChartOptions<TelemetryEntity> ChartOptions = new();
 
     private decimal? GetYValue(TelemetryEntity m)
     {
@@ -43,15 +59,47 @@
             _ => 0
         };
     }
-    private async Task ClearData()
-    {
-        await ApplicationDb.ClearTelemetry(DeviceProfileId);
-        await OnParametersSetAsync();
-        SelectedMetric = SelectedMetric;
-    }
     private object GetXText(TelemetryEntity x)
     {
         return DateTime.FromBinary(x.Timestamp).ToLocalTime().ToString("yyyy.MM.dd - HH:mm");
+    }
+    private async Task ClearData()
+    {
+        await ApplicationDb.ClearTelemetry(DeviceProfileId);
+        await UpdateChartAsync();
+    }
+    private async Task OnTelemetryUpdatedAsync(string deviceProfileId)
+    {
+        if (deviceProfileId == DeviceProfileId)
+        {
+            await InvokeAsync(async () =>
+            {
+                await UpdateChartAsync();
+                Console.WriteLine("Telemetry updated");
+            });
+        }
+    }
+    private async Task UpdateChartAsync()
+    {
+        Result<TelemetryEntity[]> result = await ApplicationDb.GetTelemetry(DeviceProfileId);
+        if (result.IsSuccess)
+        {
+            Data = result.Value;
+        }
+        if (Chart != null)
+        {
+            await Chart.UpdateSeriesAsync();
+        }
+        SelectedMetric = SelectedMetric;
+    }
+
+    async ValueTask IAsyncDisposable.DisposeAsync()
+    {
+        if (_previousDeviceProfileId != null)
+        {
+            await TelemetryHubClient.UnsubscribeFromDeviceAsync(_previousDeviceProfileId);
+        }
+        await TelemetryHubClient.DisposeAsync();
     }
 }
 

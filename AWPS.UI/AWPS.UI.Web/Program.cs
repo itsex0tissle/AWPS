@@ -37,6 +37,7 @@ builder.Services.AddKeyedScoped(HttpClientKey.Server, (provider, key) => new Htt
 {
     BaseAddress = new Uri("https://localhost:7037")
 });
+builder.Services.AddScoped(provider => new TelemetryHubClientService("https://localhost:7022/telemetry-hub"));
 
 WebApplication app = builder.Build();
 if(app.Environment.IsDevelopment() is true)

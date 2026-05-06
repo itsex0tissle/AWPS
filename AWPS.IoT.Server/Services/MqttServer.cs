@@ -2,10 +2,12 @@
 using System.Buffers;
 using MQTTnet.Protocol;
 using MQTTnet.Formatter;
+using AWPS.IoT.Server.Hubs;
 using ProGaudi.MsgPack.Light;
 using AWPS.IoT.Server.Helpers;
 using AWPS.Core.Infrastructure;
 using AWPS.IoT.Server.Resources;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using AWPS.Core.Infrastructure.Data;
 using System.Security.Authentication;
@@ -20,8 +22,9 @@ public sealed class MqttServer
     private MsgPackContext MsgPackContext { get; set; }
     private MqttClientOptions ClientOptions { get; set; }
     private IDbContextFactory<ApplicationDbContext> DatabaseFactory { get; set; }
+    private IHubContext<TelemetryHub> HubContext { get; set; }
 
-    public MqttServer(MqttClientFactory mqttFactory, IDbContextFactory<ApplicationDbContext> databaseFactory, MsgPackContext msgPackContext)
+    public MqttServer(MqttClientFactory mqttFactory, IDbContextFactory<ApplicationDbContext> databaseFactory, MsgPackContext msgPackContext, IHubContext<TelemetryHub> hubContext)
     {
         MqttClientOptionsBuilder builder = mqttFactory.CreateClientOptionsBuilder();
         builder.WithTcpServer(MqttResources.ServerUrl, 8883);
@@ -40,6 +43,7 @@ public sealed class MqttServer
         MqttClient = mqttFactory.CreateMqttClient();
         MsgPackContext = msgPackContext;
         DatabaseFactory = databaseFactory;
+        HubContext = hubContext;
     }
 
     private async Task SubscribeAllAsync()
@@ -103,6 +107,8 @@ public sealed class MqttServer
                                 }
                                 device_profile.LastUpdated = DateTime.UtcNow;
                                 await database.SaveChangesAsync();
+                                await HubContext.Clients.Group(device_profile_id).SendAsync("TelemetryUpdated", device_profile_id);
+                                Console.WriteLine($"TelemetryUpdated called for: {device_profile_id}");
                             }
                             await MqttClient.PublishStringAsync($"{device_profile_id}/{content_type}/{MqttMessageType.Response}", "true", MqttQualityOfServiceLevel.AtLeastOnce);
                         }
@@ -124,9 +130,11 @@ public sealed class MqttServer
                 {
                     try
                     {
+                        Console.WriteLine("Reconnect to MQTT");
                         await MqttClient.ReconnectAsync();
                         if(MqttClient.IsConnected is true)
                         {
+                            Console.WriteLine("MQTT reconnected");
                             await SubscribeAllAsync();
                         }
                     }
