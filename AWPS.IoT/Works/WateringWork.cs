@@ -11,7 +11,7 @@ namespace AWPS.IoT.Works
     {
         private static double DrynessIndex(TelemetryRecord record)
         {
-            return (100 - record.Moisture) * 0.5 + record.Temperature * 0.5 + record.Light * 0.1 - record.Humidity * 0.1;
+            return (100 - record.Moisture) * 10 + (record.Temperature + 20) - record.Light * 0.25 - record.Humidity * 0.25;
         }
         public static void Start()
         {
@@ -26,7 +26,7 @@ namespace AWPS.IoT.Works
                 TelemetryRecord record = TelemetryFile.Get(TelemetryFile.Count - 1);
                 double dryness = DrynessIndex(record);
                 Logger.LogInfo($"Dryness: {dryness}");
-                double dryness_limit = DeviceStateFile.Record.WareringInProcess is true ? 30.0 : 50.0;
+                double dryness_limit = DeviceStateFile.Record.WareringInProcess is true ? 600.0 : 800.0;
                 if(dryness >= dryness_limit)
                 {
                     DeviceStateFile.Record.WareringInProcess = true;
