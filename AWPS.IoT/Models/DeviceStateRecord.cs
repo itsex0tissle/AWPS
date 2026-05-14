@@ -2,6 +2,7 @@
 {
     public sealed class DeviceStateRecord
     {
-        public bool WareringInProcess { get; set; }
+        public bool WateringInProcess { get; set; }
+        public uint WateringCycle { get; set; }
     }
 }

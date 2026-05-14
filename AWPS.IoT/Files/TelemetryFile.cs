@@ -12,7 +12,7 @@ namespace AWPS.IoT.Files
 
         private static ArrayList? records;
 
-        private static ArrayList Records
+        internal static ArrayList Records
         {
             get => records ??= Load();
         }

@@ -145,7 +145,9 @@ namespace AWPS.IoT.Works
             {
                 typeof(RootWebController),
                 typeof(WifiWebController),
-                typeof(AccountWebController)
+                typeof(AccountWebController),
+                typeof(TelemetryWebController),
+                typeof(SettingsWebController),
             });
             NetworkChange.NetworkAPStationChanged += delegate(int station_index, NetworkAPStationEventArgs event_args)
             {

@@ -58,7 +58,7 @@ namespace AWPS.IoT.WebControllers
         public static void DeleteAccount(WebServerEventArgs event_args)
         {
             Logger.LogInfo("'DELETE' request on path '/account'");
-            AccountFile.Record = new();
+            AccountFile.Reset();
             WebController.SendStatusCode(event_args.Context.Response, HttpStatusCode.OK);
             Logger.LogInfo("'DELETE' response on path '/account'");
         }

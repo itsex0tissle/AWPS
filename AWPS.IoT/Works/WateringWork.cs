@@ -9,9 +9,26 @@ namespace AWPS.IoT.Works
 {
     public static class WateringWork
     {
-        private static double DrynessIndex(TelemetryRecord record)
+        private static bool NeedWatering(TelemetryRecord record)
         {
-            return (100 - record.Moisture) * 10 + (record.Temperature + 20) - record.Light * 0.25 - record.Humidity * 0.25;
+            double moisture = record.Moisture;
+            //if(moisture < 5)
+            //{
+            //    //Moisture sensor probably not used or not working
+            //    return false;
+            //}
+            moisture -= (record.Temperature - 20) / 2;
+            moisture += (record.Humidity - 50) / 10;
+            moisture -= (record.Light - 50) / 10;
+            Logger.LogInfo(
+                $"Moisture: {record.Moisture}%; " +
+                $"Temperature: {record.Temperature}C; " +
+                $"Humidity: {record.Humidity}%; " +
+                $"Light: {record.Light}%; " +
+                $"PivotMoisture: {SettingsFile.Record.MoisturePivot}%; " +
+                $"FinalMoisture: {moisture}%"
+            );
+            return moisture < SettingsFile.Record.MoisturePivot;
         }
         public static void Start()
         {
@@ -24,12 +41,10 @@ namespace AWPS.IoT.Works
                     return;
                 }
                 TelemetryRecord record = TelemetryFile.Get(TelemetryFile.Count - 1);
-                double dryness = DrynessIndex(record);
-                Logger.LogInfo($"Dryness: {dryness}");
-                double dryness_limit = DeviceStateFile.Record.WareringInProcess is true ? 600.0 : 800.0;
-                if(dryness >= dryness_limit)
+                if(RequireWatering(record) is true)
                 {
-                    DeviceStateFile.Record.WareringInProcess = true;
+                    DeviceStateFile.Record.WateringInProcess = true;
+                    DeviceStateFile.Record.WateringCycle += 1;
                     DeviceStateFile.Save();
 
                     Logger.LogInfo("Turn on watering for 5s");
@@ -41,10 +56,17 @@ namespace AWPS.IoT.Works
                 }
                 else
                 {
-                    DeviceStateFile.Record.WareringInProcess = false;
-                    DeviceStateFile.Save();
+                    Logger.LogWarning("Watering not required");
+                    DeviceStateFile.Reset();
+                }
 
-                    Logger.LogWarning("Dryness too low. Can`t continue work");
+                static bool RequireWatering(TelemetryRecord record)
+                {
+                    if(DeviceStateFile.Record.WateringInProcess is true && DeviceStateFile.Record.WateringCycle <= SettingsFile.Record.WateringCycleCount)
+                    {
+                        return true;
+                    }
+                    return NeedWatering(record);
                 }
             }
             catch(Exception exception)

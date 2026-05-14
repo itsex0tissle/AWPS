@@ -1,6 +1,6 @@
 using System;
-using AWPS.IoT.Files;
 using AWPS.IoT.Works;
+using AWPS.IoT.Files;
 using AWPS.IoT.Services;
 
 namespace AWPS.IoT
@@ -23,11 +23,11 @@ namespace AWPS.IoT
             }
             finally
             {
-                if(DeviceStateFile.Record.WareringInProcess is true)
+                if(DeviceStateFile.Record.WateringInProcess is true)
                 {
-                    Helper.EnterDeepSleep(TimeSpan.FromMinutes(2));
+                    Helper.EnterDeepSleep(TimeSpan.FromMinutes(5));
                 }
-                Helper.EnterDeepSleep(TimeSpan.FromMinutes(1));
+                Helper.EnterDeepSleep(TimeSpan.FromTicks(SettingsFile.Record.GatherTelemetryPeriod));
             }
             Logger.LogInfo($"{nameof(Program)}.{nameof(Main)} finished");
         }

@@ -21,11 +21,13 @@
   <ItemGroup>
     <Compile Include="Files\AccountFile.cs" />
     <Compile Include="Files\DeviceStateFile.cs" />
+    <Compile Include="Files\SettingsFile.cs" />
     <Compile Include="Files\TelemetryFile.cs" />
     <Compile Include="Helpers\DateTimeHelper.cs" />
     <Compile Include="Helpers\Helper.cs" />
     <Compile Include="Models\AccountRecord.cs" />
     <Compile Include="Models\DeviceStateRecord.cs" />
+    <Compile Include="Models\SettingsRecord.cs" />
     <Compile Include="MsgPack\Converters\TelemetryConverter.cs" />
     <Compile Include="MsgPack\Models\TelemetryRecord.cs" />
     <Compile Include="Models\WifiAvailableNetworkRecord.cs" />
@@ -36,6 +38,8 @@
     <Compile Include="Services\Logger.cs" />
     <Compile Include="WebControllers\AccountWebController.cs" />
     <Compile Include="WebControllers\RootWebController.cs" />
+    <Compile Include="WebControllers\SettingsWebController.cs" />
+    <Compile Include="WebControllers\TelemetryWebController.cs" />
     <Compile Include="WebControllers\WebController.cs" />
     <Compile Include="WebControllers\WifiWebController.cs" />
     <Compile Include="Works\GatherAndSaveSensorsDataWork.cs" />
