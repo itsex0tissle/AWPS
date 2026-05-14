@@ -28,4 +28,5 @@ builder.Services.AddSingleton(provider => new JsonSerializerOptions()
     PropertyNameCaseInsensitive = true,
     ReferenceHandler = ReferenceHandler.Preserve
 });
+builder.Services.AddSingleton(provider => MsgPackContextProvider.Instance);
 await builder.Build().RunAsync();

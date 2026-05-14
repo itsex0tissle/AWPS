@@ -1,0 +1,110 @@
+@inject IDeviceInteractor Device
+@code
+{
+    private DeviceNotConnectedModal DeviceNotConnectedModalRef { get; set; } = null!; //Init by @ref tag-helper
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if(firstRender is true)
+        {
+            await UpdateChartAsync();
+        }
+    }
+}
+@code
+{
+    private TelemetryRecord[] Data { get; set; } = [];
+    private ApexChart<TelemetryRecord>? Chart { get; set; }
+    private ApexChartOptions<TelemetryRecord> ChartOptions { get; set; } = new()
+    {
+        Chart = new Chart
+        {
+            Type = ChartType.Line,
+            Height = 600
+        },
+        Stroke = new Stroke
+        {
+            Curve = new CurveSelections(Curve.Smooth)
+        }
+    };
+    private string SelectedMetric
+    {
+        get => field;
+        set
+        {
+            field = value;
+            _ = Chart?.UpdateSeriesAsync();
+        }
+    } = "Moisture";
+
+    private decimal? GetYValue(TelemetryRecord m)
+    {
+        return SelectedMetric switch
+        {
+            "Light" => m.Light,
+            "Moisture" => m.Moisture,
+            "Humidity" => m.Humidity,
+            "Temperature" => m.Temperature,
+            _ => 0
+        };
+    }
+    private object GetXText(TelemetryRecord x)
+    {
+        return DateTime.FromBinary(x.Timestamp).ToLocalTime().ToString("yyyy.MM.dd - HH:mm");
+    }
+    private async Task ClearData()
+    {
+        if(await DeviceNotConnectedModalRef.SendPing() is true)
+        {
+            try
+            {
+                await Device.ClearTelemetry();
+                await UpdateChartAsync();
+            }
+            catch { }
+        }
+    }
+    private async Task UpdateChartAsync()
+    {
+        if(await DeviceNotConnectedModalRef.SendPing() is true)
+        {
+            try
+            {
+                Data = await Device.GetTelemetry();
+                if (Chart != null)
+                {
+                    await Chart.UpdateSeriesAsync();
+                }
+                SelectedMetric = SelectedMetric;
+                await InvokeAsync(StateHasChanged);
+            }
+            catch { }
+        }
+    }
+}
+
+<DeviceNotConnectedModal @ref=@DeviceNotConnectedModalRef />
+<div class="flex h-full flex-col p-6">
+    <div class="flex-1 overflow-y-auto rounded-xl bg-white p-6 shadow">
+        <div class="mb-4">
+            <label class="mb-1 block text-sm font-medium text-gray-600">Select parameter</label>
+            <div class="flex flex-row gap-x-1">
+                <select @bind="SelectedMetric" class="w-64 cursor-pointer rounded-lg border px-3 py-2">
+                    <option value="Light">Light</option>
+                    <option value="Moisture">Soil Moisture</option>
+                    <option value="Humidity">Air Humidity</option>
+                    <option value="Temperature">Temperature</option>
+                </select>
+                <div class="flex items-center gap-2">
+                    <button @onclick="ClearData"
+                            class="h-10 cursor-pointer rounded-lg bg-red-600 px-1 text-white shadow transition-all duration-300 hover:bg-red-700">
+                        Clear
+                    </button>
+                </div>
+            </div>
+        </div>           
+        <ApexChart TItem="TelemetryRecord" Options="ChartOptions" @ref="Chart">
+            <ApexPointSeries TItem="TelemetryRecord" Items="Data" Name="@SelectedMetric" XValue=@GetXText YValue="GetYValue" />
+        </ApexChart>
+    </div>
+</div>

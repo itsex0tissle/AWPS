@@ -41,6 +41,16 @@
                                          Selected="@(SelectedTab == typeof(DeviceAccountTab))">
                         Account
                     </DeviceNavSideButton>
+                    <DeviceNavSideButton OnSelect="SaveTab"
+                                         TTab="DeviceSettingsTab"
+                                         Selected="@(SelectedTab == typeof(DeviceSettingsTab))">
+                        Settings
+                    </DeviceNavSideButton>
+                    <DeviceNavSideButton OnSelect="SaveTab"
+                                         TTab="DeviceTelemetryTab"
+                                         Selected="@(SelectedTab == typeof(DeviceTelemetryTab))">
+                        Telemetry
+                    </DeviceNavSideButton>
                 </nav>
 
             </div>
@@ -60,31 +70,48 @@
             {
                 <DeviceAccountTab Id=@Id />
             }
-
+            else if (SelectedTab == typeof(DeviceSettingsTab))
+            {
+                <DeviceSettingsTab />
+            }
+            else if (SelectedTab == typeof(DeviceTelemetryTab))
+            {
+                <DeviceTelemetryTab />
+            }
         </main>
-
     </div>
 
     <!-- MOBILE BOTTOM NAV -->
-    <div class="fixed bottom-0 left-0 z-50 flex w-full items-center justify-around bg-emerald-900 py-2 text-white shadow-lg md:hidden">
+    <div class="fixed bottom-0 left-0 z-50 grid w-full grid-cols-5 items-center bg-emerald-900 py-2 text-white shadow-lg md:hidden">
 
         <button @onclick="@(() => SaveTab(typeof(DeviceHomeTab)))"
-                class="flex flex-col items-center text-xs cursor-pointer @(SelectedTab == typeof(DeviceHomeTab) ? "text-green-300" : "text-white/70")">
+                class="flex flex-col items-center justify-center text-[11px] cursor-pointer @(SelectedTab == typeof(DeviceHomeTab) ? "text-green-300" : "text-white/70")">
             <span class="text-lg">🏠</span>
             Home
         </button>
 
         <button @onclick="@(() => SaveTab(typeof(DeviceWifiTab)))"
-                class="flex flex-col items-center text-xs cursor-pointer @(SelectedTab == typeof(DeviceWifiTab) ? "text-green-300" : "text-white/70")">
+                class="flex flex-col items-center justify-center text-[11px] cursor-pointer @(SelectedTab == typeof(DeviceWifiTab) ? "text-green-300" : "text-white/70")">
             <span class="text-lg">📶</span>
             Wifi
-        </button>
+        </button>     
 
         <button @onclick="@(() => SaveTab(typeof(DeviceAccountTab)))"
-                class="flex flex-col items-center text-xs cursor-pointer @(SelectedTab == typeof(DeviceAccountTab) ? "text-green-300" : "text-white/70")">
+                class="flex flex-col items-center justify-center text-[11px] cursor-pointer @(SelectedTab == typeof(DeviceAccountTab) ? "text-green-300" : "text-white/70")">
             <span class="text-lg">👤</span>
             Account
         </button>
 
+        <button @onclick="@(() => SaveTab(typeof(DeviceSettingsTab)))"
+                class="flex flex-col items-center justify-center text-[11px] cursor-pointer @(SelectedTab == typeof(DeviceSettingsTab) ? "text-green-300" : "text-white/70")">
+            <span class="text-lg">⚙️</span>
+            Settings
+        </button>
+
+        <button @onclick="@(() => SaveTab(typeof(DeviceTelemetryTab)))"
+                class="flex flex-col items-center justify-center text-[11px] cursor-pointer @(SelectedTab == typeof(DeviceTelemetryTab) ? "text-green-300" : "text-white/70")">
+            <span class="text-lg">📊</span>
+            Telemetry
+        </button>
     </div>
 </LoadScreen>

@@ -3,10 +3,16 @@ using System.Net.Http.Json;
 using AWPS.UI.Shared.Models;
 using AWPS.UI.Shared.Helpers;
 using AWPS.UI.Shared.Services;
+using AWPS.Core.Infrastructure.MsgPack.Models;
+using ProGaudi.MsgPack.Light;
 
 namespace AWPS.UI.Web.Client.Services;
 
-public sealed class DeviceInteractor([FromKeyedServices(HttpClientKey.Device)] HttpClient httpClient, JsonSerializerOptions jsonOptions) : IDeviceInteractor
+public sealed class DeviceInteractor(
+    [FromKeyedServices(HttpClientKey.Device)] HttpClient httpClient, 
+    JsonSerializerOptions jsonOptions,
+    MsgPackContext msgPackContext
+) : IDeviceInteractor
 {
     #region IDeviceInteractor
     public async Task<bool> Ping()
@@ -58,6 +64,33 @@ public sealed class DeviceInteractor([FromKeyedServices(HttpClientKey.Device)] H
     public async Task DeleteAccount()
     {
         using HttpResponseMessage response = await httpClient.DeleteAsync("/account");
+        response.EnsureSuccessStatusCode();
+    }
+    public async Task<TelemetryRecord[]> GetTelemetry()
+    {
+        using HttpResponseMessage response = await httpClient.GetAsync("/telemetry");
+        response.EnsureSuccessStatusCode();
+        return MsgPackSerializer.Deserialize<TelemetryRecord[]>(await response.Content.ReadAsByteArrayAsync(), msgPackContext);
+    }
+    public async Task ClearTelemetry()
+    {
+        using HttpResponseMessage response = await httpClient.DeleteAsync("/telemetry");
+        response.EnsureSuccessStatusCode();
+    }
+    public async Task<SettingsRecord> GetSettings()
+    {
+        using HttpResponseMessage response = await httpClient.GetAsync("/settings");
+        response.EnsureSuccessStatusCode();
+        return JsonSerializer.Deserialize<SettingsRecord>(await response.Content.ReadAsStreamAsync(), jsonOptions) ?? throw new Exception("Failed to deserialize the record");
+    }
+    public async Task PutSettings(SettingsRecord request)
+    {
+        using HttpResponseMessage response_message = await httpClient.PutAsJsonAsync("/settings", request);
+        response_message.EnsureSuccessStatusCode();
+    }
+    public async Task ResetSettings()
+    {
+        using HttpResponseMessage response = await httpClient.DeleteAsync("/settings");
         response.EnsureSuccessStatusCode();
     }
     #endregion

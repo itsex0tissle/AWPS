@@ -50,6 +50,7 @@ public static class MauiProgram
             PropertyNameCaseInsensitive = true,
             ReferenceHandler = ReferenceHandler.Preserve
         });
+        builder.Services.AddSingleton(provider => MsgPackContextProvider.Instance);
 #if DEBUG
         builder.Services.AddBlazorWebViewDeveloperTools();
         builder.Logging.AddDebug();

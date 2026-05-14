@@ -14,39 +14,51 @@
 }
 @code
 {
-    private DeviceWifiNotConnectedModal WifiNotConnectedModalRef { get; set; } = null!; //Init by @ref tag-helper
+    private DeviceNotConnectedModal DeviceNotConnectedModalRef { get; set; } = null!; //Init by @ref tag-helper
     private AccountRecord? AccountRecord { get; set; }
 
     private async Task DeleteAccountHandle()
     {
-        if(await WifiNotConnectedModalRef.SendPing() is true)
+        if(await DeviceNotConnectedModalRef.SendPing() is true)
         {
-            await DeviceInteractor.DeleteAccount();
-            await GetAccountAsync();
+            try
+            {
+                await DeviceInteractor.DeleteAccount();
+                await GetAccountAsync();
+            }
+            catch { }
         }
     }
     private async Task PostAccountHandle()
     {
-        if(await WifiNotConnectedModalRef.SendPing() is true)
+        if(await DeviceNotConnectedModalRef.SendPing() is true)
         {
-            await DeviceInteractor.PostAccount(new AccountRecord()
+            try
             {
-                DeviceProfileId = Id
-            });
-            await GetAccountAsync();
+                await DeviceInteractor.PostAccount(new AccountRecord()
+                {
+                    DeviceProfileId = Id
+                });
+                await GetAccountAsync();
+            }
+            catch { }
         }
     }
     private async Task GetAccountAsync()
     {
-        if(await WifiNotConnectedModalRef.SendPing() is true)
+        if(await DeviceNotConnectedModalRef.SendPing() is true)
         {
-            AccountRecord = await DeviceInteractor.GetAccount();
+            try
+            {
+                AccountRecord = await DeviceInteractor.GetAccount();
+                await InvokeAsync(StateHasChanged);
+            }
+            catch { }
         }
-        _ = InvokeAsync(StateHasChanged);
     }
 }
 
-<DeviceWifiNotConnectedModal @ref=@WifiNotConnectedModalRef />
+<DeviceNotConnectedModal @ref=@DeviceNotConnectedModalRef />
 <div class="flex h-full flex-col items-center justify-center">
     <p class="m-15 text-center text-6xl text-gray-600">Account page</p>
     @if(AccountRecord is not null)
@@ -55,9 +67,13 @@
         {
             <p class="m-3 text-center text-xl text-gray-600">No account binded to the device</p>
         }
+        else if(AccountRecord.DeviceProfileId == Id)
+        {
+            <p class="m-3 text-center text-xl text-green-600">Device binded to the current profile</p>
+        }
         else
         {
-            <p class="m-3 text-center text-xl text-gray-600">Device profile: @AccountRecord.DeviceProfileId</p>
+            <p class="m-3 text-center text-xl text-yellow-600">Device binded to the another profile</p>
         }
     }
     else

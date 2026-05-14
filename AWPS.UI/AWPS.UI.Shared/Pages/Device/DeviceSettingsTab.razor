@@ -1,0 +1,169 @@
+﻿@inject IDeviceInteractor DeviceInteractor
+@code
+{
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if(firstRender is true && await DeviceNotConnectedModalRef.SendPing() is true)
+        {
+            try
+            {
+                Settings = await DeviceInteractor.GetSettings();
+                ParseTelemetry(Settings.GatherTelemetryPeriod);
+            }
+            catch { }
+        }
+    }
+}
+@code
+{
+    private SettingsRecord Settings = new();
+    private long TelemetryValue = 1;
+    private string TelemetryUnit = "Hours";
+    private DeviceNotConnectedModal DeviceNotConnectedModalRef { get; set; } = null!; //Init by @ref tag-helper
+
+    private void ParseTelemetry(long ticks)
+    {
+        var time = TimeSpan.FromTicks(ticks);
+
+        if (time.TotalDays >= 1 && time.TotalDays % 1 == 0)
+        {
+            TelemetryUnit = "Days";
+            TelemetryValue = (long)time.TotalDays;
+        }
+        else if (time.TotalHours >= 1 && time.TotalHours % 1 == 0)
+        {
+            TelemetryUnit = "Hours";
+            TelemetryValue = (long)time.TotalHours;
+        }
+        else
+        {
+            TelemetryUnit = "Minutes";
+            TelemetryValue = Math.Max(1, (long)time.TotalMinutes);
+        }
+    }
+    private async Task Save()
+    {
+        Settings.GatherTelemetryPeriod = TelemetryUnit switch
+        {
+            "Days" => TimeSpan.FromDays(TelemetryValue).Ticks,
+            "Hours" => TimeSpan.FromHours(TelemetryValue).Ticks,
+            _ => TimeSpan.FromMinutes(TelemetryValue).Ticks
+        };
+        if(await DeviceNotConnectedModalRef.SendPing() is true)
+        {
+            try
+            {
+                await DeviceInteractor.PutSettings(Settings);              
+            }
+            catch { }
+        }
+    }
+    private async Task Reset()
+    {
+        if (await DeviceNotConnectedModalRef.SendPing() is true)
+        {
+            try
+            {
+                await DeviceInteractor.ResetSettings();
+                Settings = await DeviceInteractor.GetSettings();
+                ParseTelemetry(Settings.GatherTelemetryPeriod);               
+            }
+            catch { }
+        }
+    }
+}
+
+<DeviceNotConnectedModal @ref=@DeviceNotConnectedModalRef />
+<div class="h-screen p-4 text-black">
+    <div class="mx-auto max-w-2xl rounded-xl border border-black">
+        <div class="mb-6 flex flex-row justify-center">
+            <h1 class="text-3xl font-bold text-green-300">
+                Device Settings
+            </h1>
+            <p class="mt-2 text-sm text-white/70">
+                Configure watering and telemetry preferences.
+            </p>
+        </div>
+        <div class="rounded-3xl border border-white/10 bg-white/10 p-5 shadow-2xl backdrop-blur-md">
+
+            <!-- Moisture -->
+            <div class="mb-8">
+                <div class="mb-3 flex items-center justify-between">
+                    <label class="text-sm font-medium">
+                        Moisture Pivot
+                    </label>
+                    <span class="rounded-full bg-green-400 px-3 py-1 text-sm">
+                        @Settings.MoisturePivot%
+                    </span>
+                </div>
+
+                <input type="range"
+                       min="25"
+                       max="75"
+                       step="1"
+                       @bind="Settings.MoisturePivot"
+                       class="h-2 w-full cursor-pointer appearance-none rounded-lg bg-emerald-700 accent-green-400" />
+
+                <div class="mt-2 flex justify-between text-xs text-white/50">
+                    <span>25%</span>
+                    <span>75%</span>
+                </div>
+            </div>
+
+            <!-- Watering Cycles -->
+            <div class="mb-8">
+                <label class="mb-2 block text-sm font-medium">
+                    Watering Cycle Count
+                </label>
+
+                <input type="number"
+                       min="1"
+                       @bind="Settings.WateringCycleCount"
+                       class="w-full rounded-2xl border border-white/10 bg-emerald-950/50 px-4 py-3 transition outline-none focus:border-green-400 focus:ring-2 focus:ring-green-400/40" />
+            </div>
+
+            <!-- Telemetry -->
+            <div class="mb-8">
+                <label class="mb-2 block text-sm font-medium">
+                    Gather Telemetry Period
+                </label>
+
+                <div class="grid grid-cols-1 gap-3 sm:grid-cols-[1fr_180px]">
+
+                    <input type="number"
+                           min="1"
+                           @bind="TelemetryValue"
+                           class="w-full rounded-2xl border border-white/10 bg-emerald-950/50 px-4 py-3 transition outline-none focus:border-green-400 focus:ring-2 focus:ring-green-400/40" />
+
+                    <select @bind="TelemetryUnit"
+                            class="w-full rounded-2xl border border-white/10 bg-emerald-950/50 px-4 py-3 transition outline-none focus:border-green-400 focus:ring-2 focus:ring-green-400/40">
+
+                        <option value="Minutes">Minutes</option>
+                        <option value="Hours">Hours</option>
+                        <option value="Days">Days</option>
+
+                    </select>
+
+                </div>
+            </div>
+
+            <!-- Buttons -->
+            <div class="flex flex-col gap-3 sm:flex-row">
+
+                <button @onclick="Save"
+                        class="flex-1 rounded-2xl bg-green-500 px-5 py-3 font-semibold text-black transition hover:bg-green-400 active:scale-[0.98]">
+                    Save Settings
+                </button>
+
+                <button @onclick="Reset"
+                        class="flex-1 rounded-2xl border border-red-400/30 bg-red-500/10 px-5 py-3 font-semibold text-red-300 transition hover:bg-red-500/20 active:scale-[0.98]">
+                    Reset
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
