@@ -9,7 +9,8 @@ namespace AWPS.UI.Services;
 
 public sealed class ApplicationDbInteractor(
     [FromKeyedServices(HttpClientKey.Server)] HttpClient httpClient, 
-    MauiAuthenticationStateProvider masp
+    MauiAuthenticationStateProvider masp,
+    JsonSerializerOptions jsonOptions
 ) : IApplicationDbInteractor
 {
     #region Static
@@ -59,7 +60,8 @@ public sealed class ApplicationDbInteractor(
             using HttpResponseMessage response = await httpClient.GetAsync("/app-db/device-profiles");
             if (response.IsSuccessStatusCode)
             {
-                if (JsonSerializer.Deserialize<Result<DeviceProfileEntity[]>>(await response.Content.ReadAsStringAsync()) is Result<DeviceProfileEntity[]> result)
+                string str = await response.Content.ReadAsStringAsync();
+                if (JsonSerializer.Deserialize<DeviceProfileEntity[]>(str, jsonOptions) is DeviceProfileEntity[] result)
                 {
                     return result;
                 }
@@ -84,7 +86,8 @@ public sealed class ApplicationDbInteractor(
             using HttpResponseMessage response = await httpClient.GetAsync($"/app-db/device-profile/{device_profile_id}");
             if (response.IsSuccessStatusCode)
             {
-                if (JsonSerializer.Deserialize<Result<DeviceProfileEntity>>(await response.Content.ReadAsStringAsync()) is Result<DeviceProfileEntity> result)
+                string str = await response.Content.ReadAsStringAsync();
+                if (JsonSerializer.Deserialize<DeviceProfileEntity>(str, jsonOptions) is DeviceProfileEntity result)
                 {
                     return result;
                 }
@@ -109,7 +112,8 @@ public sealed class ApplicationDbInteractor(
             using HttpResponseMessage response = await httpClient.PostAsJsonAsync("/app-db/device-profile", name);
             if (response.IsSuccessStatusCode)
             {
-                if (JsonSerializer.Deserialize<Result<DeviceProfileEntity>>(await response.Content.ReadAsStringAsync()) is Result<DeviceProfileEntity> result)
+                string str = await response.Content.ReadAsStringAsync();
+                if (JsonSerializer.Deserialize<DeviceProfileEntity>(str, jsonOptions) is DeviceProfileEntity result)
                 {
                     return result;
                 }
@@ -134,7 +138,8 @@ public sealed class ApplicationDbInteractor(
             using HttpResponseMessage response = await httpClient.PutAsJsonAsync("/app-db/device-profile", profile);
             if (response.IsSuccessStatusCode)
             {
-                if (JsonSerializer.Deserialize<Result<DeviceProfileEntity>>(await response.Content.ReadAsStringAsync()) is Result<DeviceProfileEntity> result)
+                string str = await response.Content.ReadAsStringAsync();
+                if (JsonSerializer.Deserialize<DeviceProfileEntity>(str, jsonOptions) is DeviceProfileEntity result)
                 {
                     return result;
                 }
@@ -161,7 +166,6 @@ public sealed class ApplicationDbInteractor(
             {
                 return Result.Success();
             }
-
             return MapErrorResponse(response);
         }
         catch (HttpRequestException)
@@ -180,7 +184,8 @@ public sealed class ApplicationDbInteractor(
             using HttpResponseMessage response = await httpClient.GetAsync($"/app-db/telemetry/{device_profile_id}");
             if (response.IsSuccessStatusCode)
             {
-                if (JsonSerializer.Deserialize<Result<TelemetryEntity[]>>(await response.Content.ReadAsStringAsync()) is Result<TelemetryEntity[]> result)
+                string str = await response.Content.ReadAsStringAsync();
+                if (JsonSerializer.Deserialize<TelemetryEntity[]>(str, jsonOptions) is TelemetryEntity[] result)
                 {
                     return result;
                 }

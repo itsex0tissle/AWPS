@@ -1,8 +1,8 @@
 ﻿namespace AWPS.UI.Shared.Helpers;
 
-public enum HttpClientKey
+public static class HttpClientKey
 {
-    Server,
-    Device,
-    IotServer,
+    public const string Server = "Server";
+    public const string Device = "Device";
+    public const string IotServer = "IotServer";
 }

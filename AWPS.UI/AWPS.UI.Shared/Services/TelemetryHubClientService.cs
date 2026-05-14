@@ -2,10 +2,6 @@ using Microsoft.AspNetCore.SignalR.Client;
 
 namespace AWPS.UI.Shared.Services;
 
-/// <summary>
-/// Service for managing SignalR connections to the telemetry hub on the server.
-/// Handles connection lifecycle and subscriptions to device profile updates.
-/// </summary>
 public sealed class TelemetryHubClientService : IAsyncDisposable
 {
     private HubConnection? _connection;
@@ -18,16 +14,8 @@ public sealed class TelemetryHubClientService : IAsyncDisposable
         _hubUrl = hubUrl;
     }
 
-    /// <summary>
-    /// Gets the current connection state.
-    /// </summary>
     public HubConnectionState ConnectionState => _connection?.State ?? HubConnectionState.Disconnected;
 
-    /// <summary>
-    /// Connects to the telemetry hub and sets up event handlers.
-    /// </summary>
-    /// <param name="onTelemetryUpdated">Callback invoked when telemetry is updated</param>
-    /// <param name="cancellationToken">Cancellation token</param>
     public async Task ConnectAsync(Func<string, Task> onTelemetryUpdated, CancellationToken cancellationToken = default)
     {
         try
@@ -51,12 +39,6 @@ public sealed class TelemetryHubClientService : IAsyncDisposable
         }
         catch { }
     }
-
-    /// <summary>
-    /// Subscribes to telemetry updates for a specific device profile.
-    /// </summary>
-    /// <param name="deviceProfileId">The device profile ID to subscribe to</param>
-    /// <param name="cancellationToken">Cancellation token</param>
     public async Task SubscribeToDeviceAsync(string deviceProfileId, CancellationToken cancellationToken = default)
     {
         try
@@ -80,12 +62,6 @@ public sealed class TelemetryHubClientService : IAsyncDisposable
         }
         catch { }
     }
-
-    /// <summary>
-    /// Unsubscribes from telemetry updates for a specific device profile.
-    /// </summary>
-    /// <param name="deviceProfileId">The device profile ID to unsubscribe from</param>
-    /// <param name="cancellationToken">Cancellation token</param>
     public async Task UnsubscribeFromDeviceAsync(string deviceProfileId, CancellationToken cancellationToken = default)
     {
         try
@@ -107,10 +83,6 @@ public sealed class TelemetryHubClientService : IAsyncDisposable
         }
         catch { }
     }
-
-    /// <summary>
-    /// Disconnects from the telemetry hub.
-    /// </summary>
     public async Task DisconnectAsync()
     {
         if (_connection?.State == HubConnectionState.Connected)
@@ -118,10 +90,6 @@ public sealed class TelemetryHubClientService : IAsyncDisposable
             await _connection.StopAsync();
         }
     }
-
-    /// <summary>
-    /// Disposes the hub connection.
-    /// </summary>
     public async ValueTask DisposeAsync()
     {
         if (_connection is not null)
@@ -130,9 +98,6 @@ public sealed class TelemetryHubClientService : IAsyncDisposable
         }
     }
 
-    /// <summary>
-    /// Custom retry policy for automatic reconnection.
-    /// </summary>
     private sealed class DefaultRetryPolicy : IRetryPolicy
     {
         public TimeSpan? NextRetryDelay(RetryContext context) =>

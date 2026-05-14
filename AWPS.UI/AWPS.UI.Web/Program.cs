@@ -4,11 +4,13 @@ using AWPS.UI.Web.Services;
 using AWPS.UI.Shared.Helpers;
 using AWPS.UI.Shared.Services;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Identity;
 using AWPS.Core.Infrastructure.Data;
+using Microsoft.AspNetCore.Identity;
+using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Components.Authorization;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
+builder.AddServiceDefaults();
 builder.Services.AddRazorComponents().AddInteractiveServerComponents().AddInteractiveWebAssemblyComponents();
 builder.Services.AddApexCharts();
 builder.Services.AddAuthorization();
@@ -18,6 +20,7 @@ builder.Services.AddAuthentication(options =>
 });
 builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddDbContext<ApplicationDbContext>();
+builder.Services.AddDbContextFactory<ApplicationDbContext>(lifetime: ServiceLifetime.Scoped);
 builder.Services.AddIdentityApiEndpoints<ApplicationUserEntity>(options =>
 {
     options.User.RequireUniqueEmail = true;
@@ -27,19 +30,24 @@ builder.Services.AddIdentityApiEndpoints<ApplicationUserEntity>(options =>
 builder.Services.AddScoped<AuthenticationStateProvider, IdentityRevalidatingAuthenticationStateProvider>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IApplicationDbInteractor, ApplicationDbInteractor>();
-builder.Services.AddScoped<IotServerInteractor>();
 builder.Services.AddHttpContextAccessor();
-builder.Services.AddKeyedScoped(HttpClientKey.IotServer, (provider, key) => new HttpClient()
+builder.Services.AddHttpClient(HttpClientKey.Server, client =>
 {
-    BaseAddress = new Uri("https://localhost:7022")
+    client.BaseAddress = new Uri("https+http://awps-ui-web");
 });
-builder.Services.AddKeyedScoped(HttpClientKey.Server, (provider, key) => new HttpClient()
+builder.Services.AddHttpClient(HttpClientKey.IotServer, client =>
 {
-    BaseAddress = new Uri("https://localhost:7037")
+    client.BaseAddress = new Uri("https+http://awps-iot-server");
 });
-builder.Services.AddScoped(provider => new TelemetryHubClientService("https://localhost:7022/telemetry-hub"));
+builder.Services.AddScoped<IotServerInteractor>();
+builder.Services.ConfigureHttpJsonOptions(options =>
+{
+    options.SerializerOptions.ReferenceHandler = ReferenceHandler.Preserve;
+});
+builder.Services.AddScoped(provider => new TelemetryHubClientService($"{builder.Configuration["services:awps-iot-server:https:0"]}/telemetry-hub"));
 
 WebApplication app = builder.Build();
+app.MapDefaultEndpoints();
 if(app.Environment.IsDevelopment() is true)
 {
     app.UseWebAssemblyDebugging();

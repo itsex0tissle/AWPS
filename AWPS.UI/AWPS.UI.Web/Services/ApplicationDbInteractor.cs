@@ -119,16 +119,11 @@ public sealed class ApplicationDbInteractor(
             {
                 Name = name,
                 UserId = userId,
-                LastUpdated = DateTime.UtcNow
             };
 
             dbContext.DeviceProfiles.Add(profile);
             await dbContext.SaveChangesAsync();
-            try
-            {
-                await iotServerInteractor.StartTrackingDevice(profile.Id);
-            }
-            catch { }
+            await iotServerInteractor.SubscribeAsync(profile.Id);
 
             return Result.Success(profile);
         }
@@ -186,11 +181,7 @@ public sealed class ApplicationDbInteractor(
                 return Result.NotFound();
             }
 
-            try
-            {
-                await iotServerInteractor.StopTrackingDevice(device_profile_id);
-            }
-            catch { }
+            await iotServerInteractor.UnsubscribeAsync(profile.Id);
             dbContext.DeviceProfiles.Remove(profile);
             await dbContext.SaveChangesAsync();
 

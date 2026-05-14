@@ -6,6 +6,8 @@ using AWPS.UI.Shared.Services;
 using Microsoft.Extensions.Logging;
 using AWPS.Core.Infrastructure.MsgPack;
 using Microsoft.AspNetCore.Components.Authorization;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace AWPS.UI;
 
@@ -43,6 +45,11 @@ public static class MauiProgram
         builder.Services.AddScoped<IDeviceInteractor, DeviceInteractor>();
         builder.Services.AddScoped<IApplicationDbInteractor, ApplicationDbInteractor>();
         builder.Services.AddScoped(provider => new TelemetryHubClientService("https://localhost:7022/telemetry-hub"));
+        builder.Services.AddSingleton(provider => new JsonSerializerOptions()
+        {
+            PropertyNameCaseInsensitive = true,
+            ReferenceHandler = ReferenceHandler.Preserve
+        });
 #if DEBUG
         builder.Services.AddBlazorWebViewDeveloperTools();
         builder.Logging.AddDebug();

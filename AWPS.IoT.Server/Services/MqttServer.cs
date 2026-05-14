@@ -48,6 +48,7 @@ public sealed class MqttServer
 
     private async Task SubscribeAllAsync()
     {
+        Console.WriteLine("Subscribe to all");
         await using ApplicationDbContext database = await DatabaseFactory.CreateDbContextAsync();
         foreach(string device_profile_id in database.DeviceProfiles.AsNoTracking().Select(p => p.Id))
         {
@@ -105,7 +106,6 @@ public sealed class MqttServer
                                         await database.Telemetry.AddAsync(record.ToEntity(device_profile_id));
                                     }
                                 }
-                                device_profile.LastUpdated = DateTime.UtcNow;
                                 await database.SaveChangesAsync();
                                 await HubContext.Clients.Group(device_profile_id).SendAsync("TelemetryUpdated", device_profile_id);
                                 Console.WriteLine($"TelemetryUpdated called for: {device_profile_id}");
@@ -146,6 +146,7 @@ public sealed class MqttServer
     }
     public async Task SubscribeAsync(string deviceProfileId)
     {
+        Console.WriteLine($"Subscribe to {deviceProfileId}");
         await using(ApplicationDbContext database = await DatabaseFactory.CreateDbContextAsync())
         {
             if(await database.DeviceProfiles.FindAsync(deviceProfileId) is null)
@@ -157,6 +158,7 @@ public sealed class MqttServer
     }
     public async Task UnsubscribeAsync(string deviceProfileId)
     {
+        Console.WriteLine($"Unsubscribe from {deviceProfileId}");
         await MqttClient.UnsubscribeAsync($"{deviceProfileId}/{MqttContentType.Telemetry}/{MqttMessageType.Request}");
     }
 }

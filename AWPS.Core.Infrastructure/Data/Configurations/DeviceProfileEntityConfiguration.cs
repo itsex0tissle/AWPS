@@ -12,7 +12,6 @@ public sealed class DeviceProfileEntityConfiguration : IEntityTypeConfiguration<
         builder.HasKey(x => x.Id);
         builder.Property(x => x.Id).HasMaxLength(36).IsRequired();
         builder.Property(x => x.Name).HasMaxLength(100).IsRequired();
-        builder.Property(x => x.LastUpdated).IsRequired();
         builder.OwnsOne(x => x.DeviceSettings);
         builder.Property(x => x.UserId).IsRequired();
         builder.HasOne(x => x.User).WithMany(u => u.DeviceProfiles).HasForeignKey(x => x.UserId).OnDelete(DeleteBehavior.Cascade);

@@ -6,17 +6,18 @@ using AWPS.Core.Infrastructure.Data;
 using AWPS.Core.Infrastructure.MsgPack;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
+
+builder.AddServiceDefaults();
 builder.Services.AddDbContextFactory<ApplicationDbContext>();
-builder.Services.AddScoped<MqttClientFactory>();
-builder.Services.AddScoped<MqttServer>();
+builder.Services.AddSingleton<MqttClientFactory>();
+builder.Services.AddSingleton<MqttServer>();
 builder.Services.AddSingleton(provider => MsgPackContextProvider.Instance);
 builder.Services.AddSignalR();
 
 WebApplication app = builder.Build();
-using(IServiceScope scope = app.Services.CreateScope())
-{
-    scope.ServiceProvider.GetRequiredService<MqttServer>().StartAsync();
-}
+
+app.MapDefaultEndpoints();
+app.Services.CreateScope().ServiceProvider.GetRequiredService<MqttServer>().StartAsync();
 app.MapPost("/device-profile/{id}", async([FromRoute] string id, [FromServices] MqttServer mqttServer) =>
 {
     await mqttServer.SubscribeAsync(id);

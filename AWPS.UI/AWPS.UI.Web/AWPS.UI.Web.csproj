@@ -7,9 +7,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\AWPS.IoT.Server\AWPS.IoT.Server.csproj" />
+    <ProjectReference Include="..\..\AWPS.Deploy\AWPS.Deploy.ServiceDefaults\AWPS.Deploy.ServiceDefaults.csproj" />
     <ProjectReference Include="..\AWPS.UI.Web.Client\AWPS.UI.Web.Client.csproj" />
-    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="10.0.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="10.0.7" />
+    <PackageReference Include="MQTTnet" Version="5.1.0.1559" />
   </ItemGroup>
 
 </Project>

@@ -27,6 +27,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\AWPS.Core.Infrastructure\AWPS.Core.Infrastructure.csproj" />
+    <ProjectReference Include="..\AWPS.Deploy\AWPS.Deploy.ServiceDefaults\AWPS.Deploy.ServiceDefaults.csproj" />
   </ItemGroup>
 
 </Project>

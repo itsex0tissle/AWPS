@@ -2,6 +2,7 @@
 @inject IAuthService AuthService
 @inject NavigationManager NavigationManager
 @inject IJSRuntime JS
+@inject IHttpClientFactory HttpClientFactory
 
 <div class="fixed top-0 left-0 z-50 w-full bg-green-600 text-white shadow-md">
     <div class="px-4 py-3">
@@ -47,7 +48,6 @@
 
 @code
 {
-    [Inject(Key = HttpClientKey.Server)] public HttpClient HttpClient { get; set; } = null!; //Init be InjectAttribute
     [Parameter] public RenderFragment? ChildContent { get; set; } 
 
     private string? UserEmail;
@@ -103,7 +103,8 @@
         {
             try
             {
-                using HttpResponseMessage response = await HttpClient.PostAsync("/identity/logout", null);
+                using HttpClient client = HttpClientFactory.CreateClient(HttpClientKey.Server);
+                using HttpResponseMessage response = await client.PostAsync("/identity/logout", null);
                 if(response.IsSuccessStatusCode is true)
                 {
                     result = Result.Success();
