@@ -41,11 +41,11 @@
                                          Selected="@(SelectedTab == typeof(DeviceAccountTab))">
                         Account
                     </DeviceNavSideButton>
-                    <DeviceNavSideButton OnSelect="SaveTab"
+@*                     <DeviceNavSideButton OnSelect="SaveTab"
                                          TTab="DeviceSettingsTab"
                                          Selected="@(SelectedTab == typeof(DeviceSettingsTab))">
                         Settings
-                    </DeviceNavSideButton>
+                    </DeviceNavSideButton> *@
                     <DeviceNavSideButton OnSelect="SaveTab"
                                          TTab="DeviceTelemetryTab"
                                          Selected="@(SelectedTab == typeof(DeviceTelemetryTab))">
@@ -82,7 +82,7 @@
     </div>
 
     <!-- MOBILE BOTTOM NAV -->
-    <div class="fixed bottom-0 left-0 z-50 grid w-full grid-cols-5 items-center bg-emerald-900 py-2 text-white shadow-lg md:hidden">
+    <div class="fixed bottom-0 left-0 z-50 grid w-full grid-cols-4 items-center bg-emerald-900 py-2 text-white shadow-lg md:hidden">
 
         <button @onclick="@(() => SaveTab(typeof(DeviceHomeTab)))"
                 class="flex flex-col items-center justify-center text-[11px] cursor-pointer @(SelectedTab == typeof(DeviceHomeTab) ? "text-green-300" : "text-white/70")">
@@ -102,11 +102,11 @@
             Account
         </button>
 
-        <button @onclick="@(() => SaveTab(typeof(DeviceSettingsTab)))"
+@*         <button @onclick="@(() => SaveTab(typeof(DeviceSettingsTab)))"
                 class="flex flex-col items-center justify-center text-[11px] cursor-pointer @(SelectedTab == typeof(DeviceSettingsTab) ? "text-green-300" : "text-white/70")">
             <span class="text-lg">⚙️</span>
             Settings
-        </button>
+        </button> *@
 
         <button @onclick="@(() => SaveTab(typeof(DeviceTelemetryTab)))"
                 class="flex flex-col items-center justify-center text-[11px] cursor-pointer @(SelectedTab == typeof(DeviceTelemetryTab) ? "text-green-300" : "text-white/70")">
