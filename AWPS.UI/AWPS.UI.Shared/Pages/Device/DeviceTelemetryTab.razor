@@ -1,4 +1,4 @@
-@inject IDeviceInteractor Device
+﻿@inject IDeviceInteractor Device
 @code
 {
     private DeviceNotConnectedModal DeviceNotConnectedModalRef { get; set; } = null!; //Init by @ref tag-helper
@@ -20,7 +20,7 @@
         Chart = new Chart
         {
             Type = ChartType.Line,
-            Height = 600
+            Height = 500
         },
         Stroke = new Stroke
         {
@@ -84,7 +84,7 @@
 }
 
 <DeviceNotConnectedModal @ref=@DeviceNotConnectedModalRef />
-<div class="flex h-full flex-col p-6">
+<div class="flex h-full flex-col p-1">
     <div class="flex-1 overflow-y-auto rounded-xl bg-white p-6 shadow">
         <div class="mb-4">
             <label class="mb-1 block text-sm font-medium text-gray-600">Select parameter</label>

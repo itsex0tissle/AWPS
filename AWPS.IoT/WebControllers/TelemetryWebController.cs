@@ -25,5 +25,14 @@ namespace AWPS.IoT.WebControllers
             WebController.SendStatusCode(event_args.Context.Response, HttpStatusCode.OK);
             Logger.LogInfo("'DELETE' response on path '/telemetry'");
         }
+
+        [Route("telemetry")]
+        [Method("OPTIONS")]
+        public static void ClearTelemetryHeaders(WebServerEventArgs event_args)
+        {
+            Logger.LogInfo("'OPTIONS' request on path '/telemetry'");
+            WebController.SendStatusCode(event_args.Context.Response, HttpStatusCode.OK);
+            Logger.LogInfo("'OPTIONS' response on path '/telemetry'");
+        }
     }
 }
