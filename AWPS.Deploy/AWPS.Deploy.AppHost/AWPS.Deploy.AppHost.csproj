@@ -11,9 +11,6 @@
   <ItemGroup>
     <ProjectReference Include="..\..\AWPS.IoT.Server\AWPS.IoT.Server.csproj" />
     <ProjectReference Include="..\..\AWPS.UI\AWPS.UI.Web\AWPS.UI.Web.csproj" />
-    <ProjectReference Include="..\..\AWPS.UI\AWPS.UI\AWPS.UI.csproj">
-      <SetTargetFramework>TargetFramework=net10.0</SetTargetFramework>
-    </ProjectReference>
   </ItemGroup>
 
 </Project>

@@ -1,4 +1,8 @@
 <Solution>
+  <Folder Name="/Solution Items/">
+    <File Path="Arch.md" />
+    <File Path="ArchProj.md" />
+  </Folder>
   <Project Path="AWPS.Core.Infrastructure/AWPS.Core.Infrastructure.csproj" />
   <Project Path="AWPS.Deploy/AWPS.Deploy.AppHost/AWPS.Deploy.AppHost.csproj" Id="0da1c1a2-9a4d-4a8f-9d2d-2d4362baea20" />
   <Project Path="AWPS.Deploy/AWPS.Deploy.ServiceDefaults/AWPS.Deploy.ServiceDefaults.csproj" />
