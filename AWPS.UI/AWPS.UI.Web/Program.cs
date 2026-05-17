@@ -110,7 +110,7 @@ async Task<IResult> GetDeviceProfile(string device_profile_id, [FromServices] IA
     var result = await interactor.GetDeviceProfile(device_profile_id);
     return result.IsSuccess ? Results.Ok(result.Value) : MapError(result);
 }
-async Task<IResult> CreateDeviceProfile(string name, [FromServices] IApplicationDbInteractor interactor)
+async Task<IResult> CreateDeviceProfile([FromBody] string name, [FromServices] IApplicationDbInteractor interactor)
 {
     var result = await interactor.CreateDeviceProfile(name);
     return result.IsSuccess ? Results.Created($"/app-db/device-profile/{result.Value.Id}", result.Value) : MapError(result);

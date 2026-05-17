@@ -109,7 +109,7 @@ public sealed class ApplicationDbInteractor(
     {
         try
         {
-            using HttpResponseMessage response = await httpClient.PostAsJsonAsync("/app-db/device-profile", name);
+            using HttpResponseMessage response = await httpClient.PostAsync("/app-db/device-profile", new StringContent(name));
             if (response.IsSuccessStatusCode)
             {
                 string str = await response.Content.ReadAsStringAsync();

@@ -1,0 +1,8 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/Azure/azure-dev/main/schemas/v1.0/azure.yaml.json
+
+name: awps
+services:  
+  app:
+    language: dotnet
+    project: ./AWPS.Deploy/AWPS.Deploy.AppHost/AWPS.Deploy.AppHost.csproj
+    host: containerapp
