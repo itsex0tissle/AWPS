@@ -3,6 +3,21 @@
     <File Path="Arch.md" />
     <File Path="ArchProj.md" />
   </Folder>
+  <Folder Name="/Solution Items/Screenshots/">
+    <File Path="Screenshots/AccountOptions.png" />
+    <File Path="Screenshots/Chart.png" />
+    <File Path="Screenshots/DeviceAccountPage.png" />
+    <File Path="Screenshots/DeviceTelemetryPage.png" />
+    <File Path="Screenshots/DeviceWifiTab.png" />
+    <File Path="Screenshots/IoT-Device.png" />
+    <File Path="Screenshots/Login.png" />
+    <File Path="Screenshots/MainDeviceMobilePage.png" />
+    <File Path="Screenshots/MainDevicePage.png" />
+    <File Path="Screenshots/MainPage.png" />
+    <File Path="Screenshots/ProfileCreated.png" />
+    <File Path="Screenshots/ProfileCreation.png" />
+    <File Path="Screenshots/Registration.png" />
+  </Folder>
   <Project Path="AWPS.Core.Infrastructure/AWPS.Core.Infrastructure.csproj" />
   <Project Path="AWPS.Deploy/AWPS.Deploy.AppHost/AWPS.Deploy.AppHost.csproj" Id="0da1c1a2-9a4d-4a8f-9d2d-2d4362baea20" />
   <Project Path="AWPS.Deploy/AWPS.Deploy.ServiceDefaults/AWPS.Deploy.ServiceDefaults.csproj" />
